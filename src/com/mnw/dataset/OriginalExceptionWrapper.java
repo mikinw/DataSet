@@ -28,7 +28,7 @@ public class OriginalExceptionWrapper extends Throwable {
     }
 
     public Throwable createTestCaseFailed() {
-        return (new NewErrorReportDecorator()).decorate(mOriginalThrowable, mTestCaseNo, mHint);
+        return (new ErrorReportDecoratorImpl()).decorate(mOriginalThrowable, mTestCaseNo, mHint);
     }
 
     public boolean isSerious() {

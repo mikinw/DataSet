@@ -1,7 +1,7 @@
 package com.mnw.dataset;
 
 /** TODO description of this class is missing */
-public class NewErrorReportDecorator implements ErrorReportDecorator {
+public class ErrorReportDecoratorImpl implements ErrorReportDecorator {
 
     private Throwable mOriginalThrowable;
     private int mTestCaseNo;

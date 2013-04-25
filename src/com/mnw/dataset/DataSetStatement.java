@@ -33,7 +33,7 @@ abstract class DataSetStatement extends Statement {
     protected DataSetStatement(Statement original, DataSet dataSet) {
         mOriginalStatement = original;
         mDataSet = dataSet;
-        mErrorReportDecorator = new NewErrorReportDecorator();
+        mErrorReportDecorator = new ErrorReportDecoratorImpl();
     }
 
     protected abstract void evaluateTestCase() throws OriginalExceptionWrapper, InvalidDataSetException;
