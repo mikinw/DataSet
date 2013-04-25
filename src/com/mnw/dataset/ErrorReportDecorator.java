@@ -1,10 +1,11 @@
 package com.mnw.dataset;
 
+import java.util.List;
+
 /** TODO description of this class is missing */
 public interface ErrorReportDecorator {
-    Throwable decorate(Throwable originalThrowable, int testCaseNo, String hint);
+    Throwable decorateTestCaseFailed(Throwable originalThrowable, int testCaseNo, String hint, Object[] testVector);
 
-    void wrap(Throwable originalThrowable, int testCaseNo, String hint);
-
-    Throwable decorate();
+    DataSetTestRunSummary createTestHeader(int testVectorCount, List<OriginalExceptionWrapper> failedTestCases);
+    Throwable createTestFooter(List<OriginalExceptionWrapper> failedTestCases);
 }

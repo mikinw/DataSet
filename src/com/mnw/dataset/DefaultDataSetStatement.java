@@ -2,7 +2,10 @@ package com.mnw.dataset;
 
 import org.junit.runners.model.Statement;
 
-/** TODO description of this class is missing */
+/**
+ * Default {@link DataSetStatement} implementation, which runs (evaluates) the test as is, wraps its
+ * result and gives access to the files of the test vector.
+ */
 public class DefaultDataSetStatement extends DataSetStatement {
 
     public DefaultDataSetStatement(Statement original, DataSet dataSet) {
@@ -11,13 +14,13 @@ public class DefaultDataSetStatement extends DataSetStatement {
 
     @Override
     Object getParameter(int i) throws InvalidDataSetException {
-        if (mTestCase == null) {
+        if (mTestVector == null) {
             throw new InvalidDataSetException("No DataSet defined, in spite of the fact that getParameter() has been called");
         }
-        if (mTestCase.length < i || i < 0) {
+        if (mTestVector.length < i || i < 0) {
             throw new InvalidDataSetException("Requested parameter is out of the array");
         }
-        return mTestCase[i];
+        return mTestVector[i];
     }
 
     @Override

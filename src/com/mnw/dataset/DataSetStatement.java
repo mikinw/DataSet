@@ -4,7 +4,6 @@ import org.junit.runners.model.MultipleFailureException;
 import org.junit.runners.model.Statement;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 abstract class DataSetStatement extends Statement {
@@ -28,7 +27,7 @@ abstract class DataSetStatement extends Statement {
      * element of each row. This is handled by the evaluation and in this case parameters can
      * be requested from the second ([1] since it is zero based) element.
      */
-    protected Object[] mTestCase;
+    protected Object[] mTestVector;
 
     protected DataSetStatement(Statement original, DataSet dataSet) {
         mOriginalStatement = original;
@@ -45,60 +44,31 @@ abstract class DataSetStatement extends Statement {
 
     @Override
     public void evaluate() throws Throwable {
-        mTestCase = null;
-        mTestCaseNo = 0;
-
         TestCaseable testCases = createTestData();
 
         // run evaluate with setting parameters one row by row
         mTestCaseNo = 0;
         List<OriginalExceptionWrapper> failedTestCases = new ArrayList<OriginalExceptionWrapper>();
         for (int to = testCases.getCount(); mTestCaseNo < to; mTestCaseNo++) {
-            mTestCase = testCases.getTestCase(mTestCaseNo);
+            mTestVector = testCases.getTestCase(mTestCaseNo);
             try {
                 evaluateTestCase();
             } catch (OriginalExceptionWrapper failedTestCase) {
-                failedTestCases.add(new OriginalExceptionWrapper(failedTestCase, mTestCaseNo, "", mTestCase));
+                failedTestCases.add(new OriginalExceptionWrapper(failedTestCase, mTestCaseNo, "", mTestVector));
             } catch (Throwable failedTestCase) {
-                failedTestCases.add(new OriginalExceptionWrapper(failedTestCase, mTestCaseNo, "", mTestCase));
+                failedTestCases.add(new OriginalExceptionWrapper(failedTestCase, mTestCaseNo, "", mTestVector));
             }
         }
 
         if (!(failedTestCases.isEmpty())) {
-            String summary = createSummary(testCases.getCount(), failedTestCases);
-            mThrowableList.add(new DataSetTestRunSummary(summary));
-
+            mThrowableList.add(mErrorReportDecorator.createTestHeader(testCases.getCount(), failedTestCases));
             for (OriginalExceptionWrapper failedTestCase : failedTestCases) {
-                mThrowableList.add(failedTestCase.createTestCaseFailed());
+                mThrowableList.add(failedTestCase.decorateTestCaseFailed(mErrorReportDecorator));
             }
-
-            for (OriginalExceptionWrapper failedTestCase : failedTestCases) {
-                if (failedTestCase.isSerious()) {
-                    mThrowableList.add(new DataSetTestingEndedWithException());
-                }
-            }
+            mThrowableList.add(mErrorReportDecorator.createTestFooter(failedTestCases));
         }
 
         MultipleFailureException.assertEmpty(mThrowableList);
-    }
-
-    private String createSummary(int testCasesCount, List<OriginalExceptionWrapper> failedTestCases) {
-        StringBuilder ret = new StringBuilder(100);
-        ret.append(failedTestCases.size());
-        ret.append(" tests out of ");
-        ret.append(testCasesCount);
-        ret.append(" failed.");
-        ret.append(System.getProperty("line.separator"));
-        ret.append("Failed cases: [");
-        Iterator<OriginalExceptionWrapper> iterator = failedTestCases.iterator();
-        while(iterator.hasNext()) {
-            ret.append(iterator.next().getTestCaseNo());
-            if (iterator.hasNext()) {
-                ret.append(", ");
-            }
-        }
-        ret.append("]");
-        return ret.toString();
     }
 
     // try to instantiate and set the test data

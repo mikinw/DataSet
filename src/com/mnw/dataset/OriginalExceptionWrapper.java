@@ -1,7 +1,9 @@
 package com.mnw.dataset;
 
 /**
- * TODO description of this class is missing
+ * Stores additional information about the thrown Throwable, such as testVector, index of the testVector
+ * and additional description (if any). This information will later be used to create formatted error
+ * message.
  */
 
 public class OriginalExceptionWrapper extends Throwable {
@@ -27,8 +29,8 @@ public class OriginalExceptionWrapper extends Throwable {
         this(originalThrowable.mOriginalThrowable, testCaseNo, originalThrowable.mHint + hint, testVector);
     }
 
-    public Throwable createTestCaseFailed() {
-        return (new ErrorReportDecoratorImpl()).decorate(mOriginalThrowable, mTestCaseNo, mHint);
+    public Throwable decorateTestCaseFailed(ErrorReportDecorator errorReportDecorator) {
+        return errorReportDecorator.decorateTestCaseFailed(mOriginalThrowable, mTestCaseNo, mHint, mTestVector);
     }
 
     public boolean isSerious() {

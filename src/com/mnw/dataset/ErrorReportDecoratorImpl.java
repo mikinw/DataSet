@@ -1,45 +1,21 @@
 package com.mnw.dataset;
 
-/** TODO description of this class is missing */
+import java.util.Iterator;
+import java.util.List;
+
+/**
+ * Contains methods to create and format test run header, footer and Throwables that were thrown during test run.
+ */
 public class ErrorReportDecoratorImpl implements ErrorReportDecorator {
 
-    private Throwable mOriginalThrowable;
-    private int mTestCaseNo;
-    private String mHint;
-
     @Override
-    public Throwable decorate(Throwable originalThrowable, int testCaseNo, String hint) {
-
-        /* add Custom lines to the StackTrace
-        final StackTraceElement[] orig = originalThrowable.getStackTrace();
-        final StackTraceElement[] stackTrace = new StackTraceElement[orig.length + 1];
-        for (int i = 1; i < orig.length+1; i++) {
-            stackTrace[i] = orig[i-1];
-
-        }
-        stackTrace[0] = new StackTraceElement(originalThrowable.getClass().toString(), "dsf", "87adta0", 20);
-        */
-
-//                    thr.setStackTrace(stackTrace);
-
-//                    ComparisonFailure
-
-//                    mErrorCollector.addError(new InvalidDataSetException("khgf", thr));
-//                    mErrorCollector.addError(thr);
-        final String originalExceptionName = originalThrowable.getClass().toString();
-
+    public Throwable decorateTestCaseFailed(Throwable originalThrowable, int testCaseNo, String hint, Object[] testVector) {
         if (originalThrowable instanceof InvalidDataSetException) {
             return originalThrowable;
         }
-        final TestCaseFailed decoratedError
-                = new TestCaseFailed("number " + testCaseNo + ". " + hint + "\nFailed with " + originalExceptionName, originalThrowable);
 
-        return decoratedError;
-    }
-
-    /*
-
-            StringBuilder detail = new StringBuilder(100);
+        final String originalExceptionName = originalThrowable.getClass().toString();
+        StringBuilder detail = new StringBuilder(100);
         detail.append("number ")
                 .append(testCaseNo)
                 .append(". ")
@@ -48,27 +24,65 @@ public class ErrorReportDecoratorImpl implements ErrorReportDecorator {
                 .append("Failed with ")
                 .append(originalExceptionName)
                 .append(System.getProperty("line.separator"))
-                .append("For the following test vector: < ");
+                .append("For the following test vector: < ")
+                .append(decorateTestVector(testVector))
+                .append(" >");
+
+        final TestCaseFailed decoratedError = new TestCaseFailed(detail.toString(), originalThrowable);
+        return decoratedError;
+    }
+
+    public String decorateTestVector(Object[] testVector) {
+        if (testVector == null) {
+            return "the test vector was null";
+        }
+
+        StringBuilder ret = new StringBuilder(100);
         for(int i = 0; i < testVector.length; i++) {
             Object o = testVector[i];
-            detail.append(o != null ? o.toString() : "null");
+            ret.append(o != null ? o.toString() : "null");
             if (i < testVector.length - 1) {
-                detail.append(", ");
+                ret.append(", ");
             }
         }
-        detail.append(" >");
-     */
 
-    @Override
-    public void wrap(Throwable originalThrowable, int testCaseNo, String hint) {
-        mOriginalThrowable = originalThrowable;
-        mTestCaseNo = testCaseNo;
-        mHint = hint;
+        return ret.toString();
     }
 
     @Override
-    public Throwable decorate() {
-        final String originalExceptionName = mOriginalThrowable.getClass().toString();
-        return new TestCaseFailed("number " + mTestCaseNo + ". " + mHint + "\nFailed with " + originalExceptionName, mOriginalThrowable);
+    public DataSetTestRunSummary createTestHeader(int testVectorCount, List<OriginalExceptionWrapper> failedTestCases) {
+        String summary = createHeaderSummary(testVectorCount, failedTestCases);
+        return new DataSetTestRunSummary(summary);
+    }
+
+    private String createHeaderSummary(int testCasesCount, List<OriginalExceptionWrapper> failedTestCases) {
+        StringBuilder ret = new StringBuilder(100);
+        ret.append(failedTestCases.size());
+        ret.append(" tests out of ");
+        ret.append(testCasesCount);
+        ret.append(" failed.");
+        ret.append(System.getProperty("line.separator"));
+        ret.append("Failed cases: [");
+        Iterator<OriginalExceptionWrapper> iterator = failedTestCases.iterator();
+        while(iterator.hasNext()) {
+            ret.append(iterator.next().getTestCaseNo());
+            if (iterator.hasNext()) {
+                ret.append(", ");
+            }
+        }
+        ret.append("]");
+        return ret.toString();
+    }
+
+    @Override
+    public Throwable createTestFooter(List<OriginalExceptionWrapper> failedTestCases) {
+        for (OriginalExceptionWrapper failedTestCase : failedTestCases) {
+            if (failedTestCase.isSerious()) {
+                return new DataSetTestingEndedWithException();
+            }
+        }
+        Throwable ret = new AssertionError("Only Assertion errors were during the testrun");
+        ret.setStackTrace(new StackTraceElement[0]);
+        return ret;
     }
 }
