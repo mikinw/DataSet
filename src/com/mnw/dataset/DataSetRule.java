@@ -33,6 +33,10 @@ public class DataSetRule implements TestRule {
         return mStatement.getParameter(i);
     }
 
+    public boolean getBoolean(int i) throws InvalidDataSetException {
+        return (Boolean)mStatement.getParameter(i);
+    }
+
     public int getInteger(int i) throws InvalidDataSetException {
         return (Integer)mStatement.getParameter(i);
     }

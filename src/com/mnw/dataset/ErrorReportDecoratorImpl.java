@@ -62,7 +62,7 @@ public class ErrorReportDecoratorImpl implements ErrorReportDecorator {
         ret.append(testCasesCount);
         ret.append(" failed.");
         ret.append(System.getProperty("line.separator"));
-        ret.append("Failed cases: [");
+        ret.append("Failed cases (zero based): [");
         Iterator<OriginalExceptionWrapper> iterator = failedTestCases.iterator();
         while(iterator.hasNext()) {
             ret.append(iterator.next().getTestCaseNo());
