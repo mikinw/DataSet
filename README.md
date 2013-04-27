@@ -40,4 +40,6 @@ Simple Usage:
         }
 
 
-You can find *examples* for usage in the `test/com/mnw/dataset` package.
+Examples:
+---------
+You can find more examples for usage in the `test/com/mnw/dataset` package.
