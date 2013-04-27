@@ -12,7 +12,7 @@ import java.util.Locale;
 /**
  * This example demonstrates how to extend the DataSetRule if you would like to have custom getters for your dataset.
  */
-public class Example4_CustomNamesDataSetGetters {
+public class Example4_CustomNamesDataSetGettersTest {
 
     private class CarFeature extends DataSetRule {  // <-- custom Rule, which extends the DataSetRule
         protected int engine() throws InvalidDataSetException { // <-- custom type, custom name
