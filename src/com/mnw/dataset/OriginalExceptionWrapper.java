@@ -40,4 +40,8 @@ public class OriginalExceptionWrapper extends Throwable {
     public int getTestCaseNo() {
         return mTestCaseNo;
     }
+
+    public String getInvalidDataSetWarning() {
+        return mOriginalThrowable instanceof InvalidDataSetException ? mOriginalThrowable.getLocalizedMessage() : "";
+    }
 }

@@ -34,15 +34,33 @@ public class DataSetRule implements TestRule {
     }
 
     public boolean getBoolean(int i) throws InvalidDataSetException {
-        return (Boolean)mStatement.getParameter(i);
+        final Boolean parameter;
+        try {
+            parameter = (Boolean) mStatement.getParameter(i);
+        } catch (ClassCastException e) {
+            throw new InvalidDataSetException("Parameter " + i + " can't be casted to Boolean.", e);
+        }
+        return parameter;
     }
 
-    public int getInteger(int i) throws InvalidDataSetException {
-        return (Integer)mStatement.getParameter(i);
+    public int getInt(int i) throws InvalidDataSetException {
+        final Integer parameter;
+        try {
+            parameter = (Integer)mStatement.getParameter(i);
+        } catch (ClassCastException e) {
+            throw new InvalidDataSetException("Parameter " + i + " can't be casted to Integer.", e);
+        }
+        return parameter;
     }
 
     public String getString(int i) throws InvalidDataSetException {
-        return (String)mStatement.getParameter(i);
+        final String parameter;
+        try {
+            parameter = (String)mStatement.getParameter(i);
+        } catch (ClassCastException e) {
+            throw new InvalidDataSetException("Parameter " + i + " can't be casted to String.", e);
+        }
+        return parameter;
     }
 
     public long getLong(int i) throws InvalidDataSetException {
@@ -52,7 +70,7 @@ public class DataSetRule implements TestRule {
         } else if (o instanceof Integer) {
             return (Integer)o;
         }
-        return (Long)o;
+        throw new InvalidDataSetException("Parameter " + i + " can't be casted to Long.");
     }
 
     @Override

@@ -57,20 +57,31 @@ public class ErrorReportDecoratorImpl implements ErrorReportDecorator {
 
     private String createHeaderSummary(int testCasesCount, List<OriginalExceptionWrapper> failedTestCases) {
         StringBuilder ret = new StringBuilder(100);
-        ret.append(failedTestCases.size());
-        ret.append(" tests out of ");
-        ret.append(testCasesCount);
-        ret.append(" failed.");
-        ret.append(System.getProperty("line.separator"));
-        ret.append("Failed cases (zero based): [");
+
         Iterator<OriginalExceptionWrapper> iterator = failedTestCases.iterator();
+        StringBuilder failedTestList = new StringBuilder(10);
+        String invalidDataSetWarning = "";
         while(iterator.hasNext()) {
-            ret.append(iterator.next().getTestCaseNo());
+            final OriginalExceptionWrapper next = iterator.next();
+            failedTestList.append(next.getTestCaseNo());
             if (iterator.hasNext()) {
-                ret.append(", ");
+                failedTestList.append(", ");
+            }
+            if (invalidDataSetWarning.isEmpty()) {
+                invalidDataSetWarning = " Invalid dataset. " + next.getInvalidDataSetWarning();
             }
         }
-        ret.append("]");
+
+
+        ret.append(failedTestCases.size())
+            .append(" tests out of ")
+            .append(testCasesCount)
+            .append(" failed.")
+            .append(invalidDataSetWarning)
+            .append(System.getProperty("line.separator"))
+            .append("Failed cases (zero based): [")
+            .append(failedTestList)
+            .append("]");
         return ret.toString();
     }
 

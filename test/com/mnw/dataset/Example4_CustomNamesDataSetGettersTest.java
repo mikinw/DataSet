@@ -16,7 +16,7 @@ public class Example4_CustomNamesDataSetGettersTest {
 
     private class CarFeature extends DataSetRule {  // <-- custom Rule, which extends the DataSetRule
         protected int engine() throws InvalidDataSetException { // <-- custom type, custom name
-            return super.getInteger(2); // <-- uses one of the getters provided by the DataSetRule
+            return super.getInt(2); // <-- uses one of the getters provided by the DataSetRule
         }
 
         protected String customNamedGetter() throws InvalidDataSetException {

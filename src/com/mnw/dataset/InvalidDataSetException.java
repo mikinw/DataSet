@@ -14,4 +14,8 @@ public class InvalidDataSetException extends Exception {
         super(string, ie);
     }
 
+    public InvalidDataSetException(String string, ClassCastException cce) {
+        super(string, cce);
+    }
+
 }

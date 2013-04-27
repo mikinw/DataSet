@@ -57,8 +57,8 @@ public class Example2_GeneratedDataSetTest {
     @DataSet(testData = OtherGeneratedDataSet.class)
     public void testCalculation() throws InvalidDataSetException {
         // init
-        int paramX = rule.getInteger(0);
-        int paramY = rule.getInteger(1);
+        int paramX = rule.getInt(0);
+        int paramY = rule.getInt(1);
         SophisticatedCalculatorClass sut = new SophisticatedCalculatorClass();
 
         // run
