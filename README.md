@@ -1,7 +1,7 @@
 DataSet
 =======
 
-JUnit test Rule to verify a test method with a bunch of testVectors. Similar to TestNG DataSet annotation. The main advantage over the Parametrized runner is that, this can be used together with any other runner (eg. with Robolectric runner, if you are writing tests for Android).
+JUnit test Rule to verify a test method with a bunch of testVectors. Similar to TestNG DataSet annotation. The main advantage over the Parametrized runner is that, this can be used together with any other runner (eg. with Robolectric runner, if you are writing tests for Android). Blogpost: http://mikinw.blogspot.co.uk/2013/04/parametrized-unit-test-for-junit-dataset.html
 
 Features:
 ---------
