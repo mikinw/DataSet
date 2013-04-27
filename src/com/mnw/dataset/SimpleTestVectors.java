@@ -5,11 +5,11 @@ package com.mnw.dataset;
  * this 2 dimensional array represents a testVector. The DataSet Rule will run the test method with each
  * line.
  */
-public abstract class SimpleTestCaseable implements TestCaseable {
+public abstract class SimpleTestVectors implements TestCaseable {
 
     private Object[][] mTestVectors;
 
-    public SimpleTestCaseable () {
+    public SimpleTestVectors() {
         mTestVectors = generateTestVectors();
     }
 

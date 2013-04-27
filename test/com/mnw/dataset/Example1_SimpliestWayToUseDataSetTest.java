@@ -12,7 +12,7 @@ public class Example1_SimpliestWayToUseDataSetTest {
     @Rule
     public DataSetRule rule = new DataSetRule(); // <-- this is used to access to the testVectors from inside the tests
 
-    public static class MyDataSet extends SimpleTestCaseable {
+    public static class MyDataSet extends SimpleTestVectors {
         @Override
         protected Object[][] generateTestVectors() {
             return new Object[][] {

@@ -27,7 +27,7 @@ public class Example4_CustomNamesDataSetGettersTest {
     @Rule
     public CarFeature car = new CarFeature(); // <-- use your custom Rule
 
-    public static class GetValueAsStringData extends SimpleTestCaseable {
+    public static class GetValueAsStringData extends SimpleTestVectors {
         @Override
         protected Object[][] generateTestVectors() {
             return new Object[][]  {

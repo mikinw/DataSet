@@ -11,7 +11,7 @@ public class Example3_DataSetWithExpectedExceptionTest {
     @Rule
     public DataSetRule rule = new DataSetRule(); // <-- one Rule is enough, even though multiple datasets are used
 
-    public static class MyWrongDataSet extends SimpleTestCaseable {
+    public static class MyWrongDataSet extends SimpleTestVectors {
 
         @Override
         protected Object[][] generateTestVectors() {
