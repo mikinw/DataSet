@@ -18,4 +18,8 @@ public class InvalidDataSetException extends Exception {
         super(string, cce);
     }
 
+    public InvalidDataSetException(String string, IllegalAccessException iae) {
+        super(string, iae);
+
+    }
 }

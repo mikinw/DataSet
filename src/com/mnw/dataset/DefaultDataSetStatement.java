@@ -8,8 +8,25 @@ import org.junit.runners.model.Statement;
  */
 public class DefaultDataSetStatement extends DataSetStatement {
 
-    public DefaultDataSetStatement(Statement original, DataSet dataSet) {
-        super(original, dataSet);
+    public DefaultDataSetStatement(Statement original, TestCaseable dataSet) {
+        super(original,
+             dataSet,
+             new ErrorReportDecoratorImpl(),
+             new OriginalExceptionWrapperFactory(),
+             new FailureVerifier()
+        );
+    }
+
+    protected DefaultDataSetStatement(Statement statement,
+                                      TestCaseable dataSet,
+                                      ErrorReportDecorator errorReportDecorator,
+                                      OriginalExceptionWrapperFactory originalExceptionWrapperFactory,
+                                      FailureVerifier failureVerifier) {
+        super(statement,
+              dataSet,
+              errorReportDecorator,
+              originalExceptionWrapperFactory,
+              failureVerifier);
     }
 
     @Override
@@ -31,7 +48,7 @@ public class DefaultDataSetStatement extends DataSetStatement {
         } catch (Throwable evaluateException) {
         // gather more information on the exception
         // if we didn't expect exception (no expectedExceptionFirst set) we add the row information and throw the exception further
-            throw new OriginalExceptionWrapper(evaluateException, "");
+            throw mOriginalExceptionWrapperFactory.create(evaluateException, "");
         }
     }
 }

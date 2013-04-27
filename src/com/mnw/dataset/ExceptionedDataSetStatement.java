@@ -9,8 +9,25 @@ import org.junit.runners.model.Statement;
  */
 
 public class ExceptionedDataSetStatement extends DataSetStatement {
-    public ExceptionedDataSetStatement(Statement original, DataSet dataSet) {
-        super(original, dataSet);
+    public ExceptionedDataSetStatement(Statement original, TestCaseable dataSet) {
+        super(original,
+              dataSet,
+              new ErrorReportDecoratorImpl(),
+              new OriginalExceptionWrapperFactory(),
+              new FailureVerifier()
+        );
+    }
+
+    ExceptionedDataSetStatement(Statement statement,
+                                TestCaseable dataSet,
+                                ErrorReportDecorator errorReportDecorator,
+                                OriginalExceptionWrapperFactory originalExceptionWrapperFactory,
+                                FailureVerifier failureVerifier) {
+        super(statement,
+              dataSet,
+              errorReportDecorator,
+              originalExceptionWrapperFactory,
+              failureVerifier);
     }
 
     @Override
@@ -44,7 +61,7 @@ public class ExceptionedDataSetStatement extends DataSetStatement {
 
             //noinspection StatementWithEmptyBody
             if (!expectedExceptionClass.isAssignableFrom(evaluateException.getClass())) {
-                throw new OriginalExceptionWrapper(evaluateException, "Unexpected Exception: " + evaluateException + " instead of ");
+                throw mOriginalExceptionWrapperFactory.create(evaluateException, "Unexpected Exception: " + evaluateException + " instead of ");
             } else {
                 // good, next step
             }

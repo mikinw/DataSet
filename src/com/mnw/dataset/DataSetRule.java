@@ -10,6 +10,11 @@ public class DataSetRule implements TestRule {
      * Holds the currently evaluated Statement
      */
     private DataSetStatement mStatement;
+    private TestCaseableCreator mTestCaseableCreator;
+
+    public DataSetRule() {
+        mTestCaseableCreator = new TestCaseableCreator();
+    }
 
     /**
      * Returns the row number of the dataset that is being tested.
@@ -76,7 +81,6 @@ public class DataSetRule implements TestRule {
     @Override
     public final Statement apply(final Statement statement, final Description description) {
         DataSet dataSet = description.getAnnotation(DataSet.class);
-        
 
         // if no dataset present or it is default (no actual dataset set), just run evaluate as usual
         // DataSet.class marks the default meaning no dataset has been given
@@ -88,10 +92,12 @@ public class DataSetRule implements TestRule {
             throw new IllegalStateException("statement is already set for this Rule instance");
         }
 
+        final TestCaseable testData = mTestCaseableCreator.createTestData(dataSet);
+
         if (dataSet.expectedExceptionFirst()) {
-            mStatement = new ExceptionedDataSetStatement(statement, dataSet);
+            mStatement = new ExceptionedDataSetStatement(statement, testData);
         } else {
-            mStatement = new DefaultDataSetStatement(statement, dataSet);
+            mStatement = new DefaultDataSetStatement(statement, testData);
         }
 
         return mStatement;

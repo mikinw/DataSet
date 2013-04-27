@@ -1,18 +1,21 @@
 package com.mnw.dataset;
 
-import org.junit.runners.model.MultipleFailureException;
 import org.junit.runners.model.Statement;
 
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO [mnw] getParameter* should throw other exception (eg. IllegalDataSetAccess)
+// TODO [mnw] split DefaultDataSetStatement and ExceptionedDataSetStatement to two (evaluator, paramAccessor), instatntiate these couple with a factory
+
 abstract class DataSetStatement extends Statement {
+    protected final OriginalExceptionWrapperFactory mOriginalExceptionWrapperFactory;
+    private final FailureVerifier mFailureVerifier;
     protected Statement mOriginalStatement;
     protected ErrorReportDecorator mErrorReportDecorator;
-    private DataSet mDataSet;
+    private TestCaseable testCases;
     int mTestCaseNo;
 
-    private List<Throwable> mThrowableList = new ArrayList<Throwable>();
     /**
      * This array is instantiated during the test function evaluation. If a valid DataSet.testData
      * is present. The testData should <br>
@@ -29,10 +32,16 @@ abstract class DataSetStatement extends Statement {
      */
     protected Object[] mTestVector;
 
-    protected DataSetStatement(Statement original, DataSet dataSet) {
-        mOriginalStatement = original;
-        mDataSet = dataSet;
-        mErrorReportDecorator = new ErrorReportDecoratorImpl();
+    protected DataSetStatement(Statement statement,
+                     TestCaseable dataSet,
+                     ErrorReportDecorator errorReportDecorator,
+                     OriginalExceptionWrapperFactory originalExceptionWrapperFactory,
+                     FailureVerifier failureVerifier) {
+        mOriginalStatement = statement;
+        testCases = dataSet;
+        mErrorReportDecorator = errorReportDecorator;
+        mOriginalExceptionWrapperFactory = originalExceptionWrapperFactory;
+        mFailureVerifier = failureVerifier;
     }
 
     protected abstract void evaluateTestCase() throws OriginalExceptionWrapper, InvalidDataSetException;
@@ -44,9 +53,28 @@ abstract class DataSetStatement extends Statement {
 
     @Override
     public void evaluate() throws Throwable {
-        TestCaseable testCases = createTestData();
+        List<OriginalExceptionWrapper> failedTestCases = evaluateAll(testCases);
 
-        // run evaluate with setting parameters one row by row
+        List<Throwable> outputThrowableList = analyseFailedTestVectors(testCases, failedTestCases);
+
+        mFailureVerifier.assertEmpty(outputThrowableList);
+    }
+
+    private List<Throwable> analyseFailedTestVectors(TestCaseable testCases,
+                                                     List<OriginalExceptionWrapper> failedTestCases) {
+        List<Throwable> outputThrowableList = new ArrayList<Throwable>();
+        if (!(failedTestCases.isEmpty())) {
+            outputThrowableList.add(mErrorReportDecorator.createTestHeader(testCases.getCount(), failedTestCases));
+            for (OriginalExceptionWrapper failedTestCase : failedTestCases) {
+                outputThrowableList.add(failedTestCase.decorateTestCaseFailed(mErrorReportDecorator));
+            }
+            outputThrowableList.add(mErrorReportDecorator.createTestFooter(failedTestCases));
+        }
+        return outputThrowableList;
+    }
+
+    // run evaluate with setting parameters one row by row
+    private List<OriginalExceptionWrapper> evaluateAll(TestCaseable testCases) {
         mTestCaseNo = 0;
         List<OriginalExceptionWrapper> failedTestCases = new ArrayList<OriginalExceptionWrapper>();
         for (int to = testCases.getCount(); mTestCaseNo < to; mTestCaseNo++) {
@@ -54,36 +82,12 @@ abstract class DataSetStatement extends Statement {
             try {
                 evaluateTestCase();
             } catch (OriginalExceptionWrapper failedTestCase) {
-                failedTestCases.add(new OriginalExceptionWrapper(failedTestCase, mTestCaseNo, "", mTestVector));
+                failedTestCases.add(mOriginalExceptionWrapperFactory.create(failedTestCase, mTestCaseNo, mTestVector));
             } catch (Throwable failedTestCase) {
-                failedTestCases.add(new OriginalExceptionWrapper(failedTestCase, mTestCaseNo, "", mTestVector));
+                failedTestCases.add(mOriginalExceptionWrapperFactory.create(failedTestCase, mTestCaseNo, mTestVector));
             }
         }
-
-        if (!(failedTestCases.isEmpty())) {
-            mThrowableList.add(mErrorReportDecorator.createTestHeader(testCases.getCount(), failedTestCases));
-            for (OriginalExceptionWrapper failedTestCase : failedTestCases) {
-                mThrowableList.add(failedTestCase.decorateTestCaseFailed(mErrorReportDecorator));
-            }
-            mThrowableList.add(mErrorReportDecorator.createTestFooter(failedTestCases));
-        }
-
-        MultipleFailureException.assertEmpty(mThrowableList);
-    }
-
-    // try to instantiate and set the test data
-    private TestCaseable createTestData() throws IllegalAccessException, InvalidDataSetException {
-        TestCaseable testCases;
-        try {
-            Class<?> testDataClass = mDataSet.testData();
-            testCases = (TestCaseable) testDataClass.newInstance();
-
-        } catch (InstantiationException ie) {
-            throw new InvalidDataSetException(
-                    "Can't instantiate given DataSet. It may reference some abstract method or it isn't static class",
-                    ie);
-        }
-        return testCases;
+        return failedTestCases;
     }
 
 
