@@ -1,0 +1,46 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <repositories>
+        <repository>
+            <id>project_local</id>
+            <url>file://${project.basedir}</url>
+        </repository>
+    </repositories>
+
+    <groupId>com.mnw.dataset</groupId>
+    <artifactId>dataset</artifactId>
+    <packaging>jar</packaging>
+    <version>1.1</version>
+
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+    </build>
+
+    <profiles>
+
+    </profiles>
+
+    <dependencies>
+        <!-- For unit tests. Exclude hamcrest stuff built-in in favour of better explicitly specified version -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit-dep</artifactId>
+            <version>4.10</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Mockito -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+        </dependency>
+
+    </dependencies>
+</project>
