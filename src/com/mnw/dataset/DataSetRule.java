@@ -35,6 +35,10 @@ public class DataSetRule implements TestRule {
      * @throws InvalidDataSetException if something goes wrong
      */
     public Object getParameter(int i) throws InvalidDataSetException {
+        if (mStatement == null) {
+            throw new NullPointerException("DataSetRule is not properly initialised (TestVector seems to be null)." + 
+                " DataSetRule should be initialised directly in the test class (not in the setUp()/@Before method).");
+        }
         return mStatement.getParameter(i);
     }
 
