@@ -34,11 +34,23 @@ public class OriginalExceptionWrapper extends Throwable {
     }
 
     public boolean isSerious() {
-        return !(mOriginalThrowable instanceof AssertionError);
+        return !(mOriginalThrowable instanceof AssertionError) && !(mOriginalThrowable instanceof org.junit.internal.AssumptionViolatedException);
+    }
+
+    public boolean isSkipped() {
+        return (mOriginalThrowable instanceof org.junit.internal.AssumptionViolatedException);
+    }
+
+    public boolean isAssertionError() {
+        return (mOriginalThrowable instanceof AssertionError);
     }
 
     public int getTestCaseNo() {
         return mTestCaseNo;
+    }
+
+    public boolean hasInvalidDatasetWarning() {
+        return mOriginalThrowable instanceof InvalidDataSetException;
     }
 
     public String getInvalidDataSetWarning() {

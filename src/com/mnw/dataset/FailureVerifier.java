@@ -1,6 +1,5 @@
 package com.mnw.dataset;
 
-import org.junit.runners.model.MultipleFailureException;
 import java.util.List;
 
 /**
@@ -8,7 +7,6 @@ import java.util.List;
  */
 public class FailureVerifier {
     public void assertEmpty(List<Throwable> outputThrowableList) throws Throwable {
-        MultipleFailureException.assertEmpty(outputThrowableList);
-
+        MultipleFailureOrSkipException.assertOnlyFailureOrError(outputThrowableList);
     }
 }

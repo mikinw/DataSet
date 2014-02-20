@@ -1,5 +1,7 @@
 package com.mnw.dataset;
 
+import org.junit.internal.AssumptionViolatedException;
+
 import java.util.Iterator;
 import java.util.List;
 
@@ -58,42 +60,76 @@ public class ErrorReportDecoratorImpl implements ErrorReportDecorator {
     private String createHeaderSummary(int testCasesCount, List<OriginalExceptionWrapper> failedTestCases) {
         StringBuilder ret = new StringBuilder(100);
 
+        int failedTestCount = 0;
+        int skippedTestCount = 0;
         Iterator<OriginalExceptionWrapper> iterator = failedTestCases.iterator();
         StringBuilder failedTestList = new StringBuilder(10);
+        StringBuilder skippedTestList = new StringBuilder(10);
         String invalidDataSetWarning = "";
         while(iterator.hasNext()) {
             final OriginalExceptionWrapper next = iterator.next();
-            failedTestList.append(next.getTestCaseNo());
-            if (iterator.hasNext()) {
-                failedTestList.append(", ");
+            if (next.isSkipped()) {
+                if (skippedTestCount > 0) skippedTestList.append(", ");
+                skippedTestList.append(next.getTestCaseNo());
+                skippedTestCount++;
             }
-            if (invalidDataSetWarning.isEmpty()) {
-                invalidDataSetWarning = " Invalid dataset. " + next.getInvalidDataSetWarning();
+
+            if (next.isSerious() || next.isAssertionError()) {
+                if (failedTestCount > 0) failedTestList.append(", ");
+                failedTestList.append(next.getTestCaseNo());
+                if (invalidDataSetWarning.isEmpty() && next.hasInvalidDatasetWarning()) {
+                    invalidDataSetWarning = " Invalid dataset. " + next.getInvalidDataSetWarning();
+                }
+                failedTestCount++;
             }
         }
 
 
-        ret.append(failedTestCases.size())
-            .append(" tests out of ")
+        if (!(invalidDataSetWarning.isEmpty())) {
+            ret.append(invalidDataSetWarning);
+            return ret.toString();
+        }
+
+        ret.append("Out of ")
             .append(testCasesCount)
-            .append(" failed.")
-            .append(invalidDataSetWarning)
-            .append(System.getProperty("line.separator"))
-            .append("Failed cases (zero based): [")
-            .append(failedTestList)
-            .append("]");
+            .append(" total tests ");
+        if (failedTestCount > 0) {
+            ret.append(failedTestCount)
+                .append(" failed ")
+                .append(System.getProperty("line.separator"))
+                .append("Failed cases (zero based): [")
+                .append(failedTestList)
+                .append("]");
+
+        }
+        if (skippedTestCount > 0) {
+            ret.append(skippedTestCount)
+                .append(skippedTestCount > 1 ? " were " : " was ")
+                .append("skipped")
+                .append(System.getProperty("line.separator"))
+                .append("Skipped cases (zero based): [")
+                .append(skippedTestList)
+                .append("]");
+        }
         return ret.toString();
     }
 
     @Override
     public Throwable createTestFooter(List<OriginalExceptionWrapper> failedTestCases) {
+        Throwable mostSeriousError = null;
         for (OriginalExceptionWrapper failedTestCase : failedTestCases) {
             if (failedTestCase.isSerious()) {
                 return new DataSetTestingEndedWithException();
             }
+
+            if (failedTestCase.isAssertionError()) {
+                mostSeriousError = new AssertionError("Assertion error(s) found.");
+                mostSeriousError.setStackTrace(new StackTraceElement[0]);
+            } else if (failedTestCase.isSkipped() && !(mostSeriousError instanceof AssertionError)) {
+                mostSeriousError = new AssumptionViolatedException("All tests cases skipped.");
+                mostSeriousError.setStackTrace(new StackTraceElement[0]);
+            }
         }
-        Throwable ret = new AssertionError("Only Assertion errors were during the testrun");
-        ret.setStackTrace(new StackTraceElement[0]);
-        return ret;
+        return mostSeriousError;
     }
 }

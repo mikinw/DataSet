@@ -5,9 +5,7 @@ import org.junit.runners.model.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO [mnw] getParameter* should throw other exception (eg. IllegalDataSetAccess)
-// TODO [mnw] split DefaultDataSetStatement and ExceptionedDataSetStatement to two (evaluator, paramAccessor), instatntiate these couple with a factory
-
+@SuppressWarnings("OverlyBroadCatchBlock")
 abstract class DataSetStatement extends Statement {
     protected final OriginalExceptionWrapperFactory mOriginalExceptionWrapperFactory;
     private final FailureVerifier mFailureVerifier;
@@ -53,15 +51,14 @@ abstract class DataSetStatement extends Statement {
 
     @Override
     public void evaluate() throws Throwable {
-        List<OriginalExceptionWrapper> failedTestCases = evaluateAll(testCases);
+        List<OriginalExceptionWrapper> failedTestCases = evaluateAll();
 
-        List<Throwable> outputThrowableList = analyseFailedTestVectors(testCases, failedTestCases);
+        List<Throwable> outputThrowableList = analyseFailedTestVectors(failedTestCases);
 
         mFailureVerifier.assertEmpty(outputThrowableList);
     }
 
-    private List<Throwable> analyseFailedTestVectors(TestCaseable testCases,
-                                                     List<OriginalExceptionWrapper> failedTestCases) {
+    private List<Throwable> analyseFailedTestVectors(List<OriginalExceptionWrapper> failedTestCases) {
         List<Throwable> outputThrowableList = new ArrayList<Throwable>();
         if (!(failedTestCases.isEmpty())) {
             outputThrowableList.add(mErrorReportDecorator.createTestHeader(testCases.getCount(), failedTestCases));
@@ -74,7 +71,7 @@ abstract class DataSetStatement extends Statement {
     }
 
     // run evaluate with setting parameters one row by row
-    private List<OriginalExceptionWrapper> evaluateAll(TestCaseable testCases) {
+    private List<OriginalExceptionWrapper> evaluateAll() {
         mTestCaseNo = 0;
         List<OriginalExceptionWrapper> failedTestCases = new ArrayList<OriginalExceptionWrapper>();
         for (int to = testCases.getCount(); mTestCaseNo < to; mTestCaseNo++) {

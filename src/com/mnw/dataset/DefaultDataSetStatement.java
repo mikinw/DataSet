@@ -1,5 +1,6 @@
 package com.mnw.dataset;
 
+import org.junit.internal.AssumptionViolatedException;
 import org.junit.runners.model.Statement;
 
 /**
