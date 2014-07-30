@@ -7,6 +7,6 @@ import java.util.List;
  */
 public class FailureVerifier {
     public void assertEmpty(List<Throwable> outputThrowableList) throws Throwable {
-        MultipleFailureOrSkipException.assertOnlyFailureOrError(outputThrowableList);
+        MultipleFailureOrSkipException.assertEmpty(outputThrowableList);
     }
 }

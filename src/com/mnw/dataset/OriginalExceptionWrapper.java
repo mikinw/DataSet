@@ -34,14 +34,18 @@ public class OriginalExceptionWrapper extends Throwable {
     }
 
     public boolean isSerious() {
-        return !(mOriginalThrowable instanceof AssertionError) && !(mOriginalThrowable instanceof org.junit.internal.AssumptionViolatedException);
+        return !isSkipped() && !isAssertionFailure() && !isPassedTest();
+    }
+
+    public boolean isPassedTest() {
+        return (mOriginalThrowable instanceof PassedTestCaseException);
     }
 
     public boolean isSkipped() {
         return (mOriginalThrowable instanceof org.junit.internal.AssumptionViolatedException);
     }
 
-    public boolean isAssertionError() {
+    public boolean isAssertionFailure() {
         return (mOriginalThrowable instanceof AssertionError);
     }
 

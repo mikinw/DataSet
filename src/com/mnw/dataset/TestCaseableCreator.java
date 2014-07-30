@@ -1,12 +1,12 @@
 package com.mnw.dataset;
 
 /**
- * Creates any array of testVectors out of a DataSet.
+ * Creates an array of testVectors out of a DataSet.
  */
 public class TestCaseableCreator {
 
     // try to instantiate and set the test data
-    public TestCaseable createTestData(DataSet dataSet) {
+    public TestCaseable createTestData(final DataSet dataSet) {
         TestCaseable testCases;
         try {
             Class<?> testDataClass = dataSet.testData();

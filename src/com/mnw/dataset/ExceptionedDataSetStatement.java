@@ -8,17 +8,17 @@ import org.junit.runners.model.Statement;
  * place of the test vector. This Exception is the expected exception.
  */
 
-public class ExceptionedDataSetStatement extends DataSetStatement {
-    public ExceptionedDataSetStatement(Statement original, TestCaseable dataSet) {
+public class ExceptionedDataSetStatement /*extends DataSetStatement*/ {
+/*    public ExceptionedDataSetStatement(Statement original, TestCaseable dataSet) {
         super(original,
               dataSet,
               new ErrorReportDecoratorImpl(),
               new OriginalExceptionWrapperFactory(),
-              new FailureVerifier()
-        );
-    }
+              new FailureVerifier(),
+              testCaseEvaluator, statementComponentFactoryXXX);
+    }*/
 
-    ExceptionedDataSetStatement(Statement statement,
+/*    ExceptionedDataSetStatement(Statement statement,
                                 TestCaseable dataSet,
                                 ErrorReportDecorator errorReportDecorator,
                                 OriginalExceptionWrapperFactory originalExceptionWrapperFactory,
@@ -28,9 +28,9 @@ public class ExceptionedDataSetStatement extends DataSetStatement {
               errorReportDecorator,
               originalExceptionWrapperFactory,
               failureVerifier);
-    }
+    }*/
 
-    @Override
+/*    @Override
     Object getParameter(int i) throws InvalidDataSetException {
         if (mTestVector == null) {
             throw new InvalidDataSetException("No DataSet defined, in spite of the fact that getParameter() has been called");
@@ -43,9 +43,9 @@ public class ExceptionedDataSetStatement extends DataSetStatement {
             throw new InvalidDataSetException("Requested parameter is out of the array");
         }
         return mTestVector[i];
-    }
+    }*/
 
-    @Override
+/*    @Override
     protected void evaluateTestCase() throws OriginalExceptionWrapper, InvalidDataSetException {
         final Class<? extends Throwable> expectedExceptionClass = findExpectedExceptionClass();
 
@@ -84,5 +84,5 @@ public class ExceptionedDataSetStatement extends DataSetStatement {
                     "Expected exception class is null. It should never be if you set expectedExceptionFirst to true in the annotation");
         }
         return expectedExceptionClass;
-    }
+    }*/
 }

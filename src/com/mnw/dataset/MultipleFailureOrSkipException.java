@@ -1,6 +1,5 @@
 package com.mnw.dataset;
 
-import com.google.common.collect.Collections2;
 import org.junit.internal.AssumptionViolatedException;
 
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ public class MultipleFailureOrSkipException extends Exception {
                 if (((OriginalExceptionWrapper)error).isSkipped()) {
                     mSkippedList.add(error);
                 }
-                if (((OriginalExceptionWrapper)error).isSerious() || ((OriginalExceptionWrapper)error).isAssertionError()) {
+                if (((OriginalExceptionWrapper)error).isSerious() || ((OriginalExceptionWrapper)error).isAssertionFailure()) {
                     mErrorList.add(error);
                 }
             }
@@ -60,19 +59,19 @@ public class MultipleFailureOrSkipException extends Exception {
 
     @SuppressWarnings("deprecation")
     public static void assertOnlyFailureOrError(List<Throwable> errors) throws Throwable {
-        if (errors.size() >= 1 && errors.get(errors.size()-1) instanceof AssumptionViolatedException) {
-            throw new AssumptionViolatedException("All test cases were skipped");
-        }
+//        if (errors.size() >= 1 && errors.get(errors.size()-1) instanceof AssumptionViolatedException) {
+//            throw new AssumptionViolatedException("All test cases were skipped");
+//        }
         final List<Throwable> errorList = new ArrayList<Throwable>();
-        final List<Throwable> skippedList = new ArrayList<Throwable>();
+//        final List<Throwable> skippedList = new ArrayList<Throwable>();
         for (Throwable error : errors) {
             if (error instanceof OriginalExceptionWrapper) {
 
-                if (((OriginalExceptionWrapper)error).isSkipped()) {
-                    skippedList.add(error);
-                }
+//                if (((OriginalExceptionWrapper)error).isSkipped()) {
+//                    skippedList.add(error);
+//                }
 
-                if (((OriginalExceptionWrapper)error).isSerious() || ((OriginalExceptionWrapper)error).isAssertionError()) {
+                if (((OriginalExceptionWrapper)error).isSerious() || ((OriginalExceptionWrapper)error).isAssertionFailure()) {
                     errorList.add(error);
                 }
             } else {

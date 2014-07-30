@@ -1,24 +1,23 @@
 package com.mnw.dataset;
 
-import org.junit.internal.AssumptionViolatedException;
 import org.junit.runners.model.Statement;
 
 /**
  * Default {@link DataSetStatement} implementation, which runs (evaluates) the test as is, wraps its
  * result and gives access to the files of the test vector.
  */
-public class DefaultDataSetStatement extends DataSetStatement {
+public class DefaultDataSetStatement /*extends DataSetStatement*/ {
 
-    public DefaultDataSetStatement(Statement original, TestCaseable dataSet) {
+/*    public DefaultDataSetStatement(Statement original, TestCaseable dataSet) {
         super(original,
              dataSet,
              new ErrorReportDecoratorImpl(),
              new OriginalExceptionWrapperFactory(),
-             new FailureVerifier()
-        );
-    }
+             new FailureVerifier(),
+             testCaseEvaluator, statementComponentFactoryXXX);
+    }*/
 
-    protected DefaultDataSetStatement(Statement statement,
+/*    protected DefaultDataSetStatement(Statement statement,
                                       TestCaseable dataSet,
                                       ErrorReportDecorator errorReportDecorator,
                                       OriginalExceptionWrapperFactory originalExceptionWrapperFactory,
@@ -28,9 +27,9 @@ public class DefaultDataSetStatement extends DataSetStatement {
               errorReportDecorator,
               originalExceptionWrapperFactory,
               failureVerifier);
-    }
+    }*/
 
-    @Override
+/*    @Override
     Object getParameter(int i) throws InvalidDataSetException {
         if (mTestVector == null) {
             throw new InvalidDataSetException("No DataSet defined, in spite of the fact that getParameter() has been called");
@@ -39,9 +38,9 @@ public class DefaultDataSetStatement extends DataSetStatement {
             throw new InvalidDataSetException("Requested parameter is out of the array");
         }
         return mTestVector[i];
-    }
+    }*/
 
-    @Override
+/*    @Override
     protected void evaluateTestCase() throws OriginalExceptionWrapper, InvalidDataSetException {
         try {
             mOriginalStatement.evaluate();
@@ -51,5 +50,5 @@ public class DefaultDataSetStatement extends DataSetStatement {
         // if we didn't expect exception (no expectedExceptionFirst set) we add the row information and throw the exception further
             throw mOriginalExceptionWrapperFactory.create(evaluateException, "");
         }
-    }
+    }*/
 }

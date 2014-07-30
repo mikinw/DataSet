@@ -6,12 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("OverlyBroadCatchBlock")
-abstract class DataSetStatement extends Statement {
-    protected final OriginalExceptionWrapperFactory mOriginalExceptionWrapperFactory;
+class DataSetStatement extends Statement {
+    private final OriginalExceptionWrapperFactory mOriginalExceptionWrapperFactory;
     private final FailureVerifier mFailureVerifier;
-    protected Statement mOriginalStatement;
-    protected ErrorReportDecorator mErrorReportDecorator;
-    private TestCaseable testCases;
+    private final ErrorReportDecorator mErrorReportDecorator;
+    private final TestCaseable mTestCases;
+    private final TestCaseEvaluator mTestCaseEvaluator;
+    private final StatementComponentFactory mStatementComponentFactory;
     int mTestCaseNo;
 
     /**
@@ -28,22 +29,26 @@ abstract class DataSetStatement extends Statement {
      * element of each row. This is handled by the evaluation and in this case parameters can
      * be requested from the second ([1] since it is zero based) element.
      */
-    protected Object[] mTestVector;
+//    private Object[] mTestVector;
+    private ParameterProvider mParameterProvider;
 
-    protected DataSetStatement(Statement statement,
-                     TestCaseable dataSet,
-                     ErrorReportDecorator errorReportDecorator,
-                     OriginalExceptionWrapperFactory originalExceptionWrapperFactory,
-                     FailureVerifier failureVerifier) {
-        mOriginalStatement = statement;
-        testCases = dataSet;
+    protected DataSetStatement(TestCaseable dataSet,
+                               ErrorReportDecorator errorReportDecorator,
+                               OriginalExceptionWrapperFactory originalExceptionWrapperFactory,
+                               FailureVerifier failureVerifier,
+                               TestCaseEvaluator testCaseEvaluator,
+                               StatementComponentFactory statementComponentFactory) {
+        mTestCases = dataSet;
         mErrorReportDecorator = errorReportDecorator;
         mOriginalExceptionWrapperFactory = originalExceptionWrapperFactory;
         mFailureVerifier = failureVerifier;
+        this.mTestCaseEvaluator = testCaseEvaluator;
+        mStatementComponentFactory = statementComponentFactory;
     }
 
-    protected abstract void evaluateTestCase() throws OriginalExceptionWrapper, InvalidDataSetException;
-    abstract Object getParameter(int i) throws InvalidDataSetException;
+    public Object getParameter(int i) throws InvalidDataSetException {
+        return mParameterProvider.getParameter(i);
+    }
 
     public int getTestCaseNumber() {
         return mTestCaseNo;
@@ -51,40 +56,56 @@ abstract class DataSetStatement extends Statement {
 
     @Override
     public void evaluate() throws Throwable {
-        List<OriginalExceptionWrapper> failedTestCases = evaluateAll();
+        Results results = evaluateAll();
 
-        List<Throwable> outputThrowableList = analyseFailedTestVectors(failedTestCases);
+        List<Throwable> outputThrowableList = analyseFailedTestVectors(results);
 
         mFailureVerifier.assertEmpty(outputThrowableList);
     }
 
-    private List<Throwable> analyseFailedTestVectors(List<OriginalExceptionWrapper> failedTestCases) {
+    private List<Throwable> analyseFailedTestVectors(Results testResults) {
         List<Throwable> outputThrowableList = new ArrayList<Throwable>();
-        if (!(failedTestCases.isEmpty())) {
-            outputThrowableList.add(mErrorReportDecorator.createTestHeader(testCases.getCount(), failedTestCases));
-            for (OriginalExceptionWrapper failedTestCase : failedTestCases) {
-                outputThrowableList.add(failedTestCase.decorateTestCaseFailed(mErrorReportDecorator));
+
+        // add header if error, assert, assumption
+        // footer is the most serious exception
+        if (testResults.isMostSeriousAssumptionFailure()) {
+            outputThrowableList.add(mErrorReportDecorator.createOnlyAssumptionTestFooter(testResults));
+            return outputThrowableList;
+        }
+
+        if (testResults.hasFailure()) {
+            outputThrowableList.add(mErrorReportDecorator.createTestHeader(mTestCases.getCount(), testResults));
+            for (OriginalExceptionWrapper testResult : testResults) {
+                if (!testResult.isPassedTest()) {
+                    outputThrowableList.add(testResult.decorateTestCaseFailed(mErrorReportDecorator));
+                }
             }
-            outputThrowableList.add(mErrorReportDecorator.createTestFooter(failedTestCases));
+            outputThrowableList.add(mErrorReportDecorator.createTestFooter(testResults));
         }
         return outputThrowableList;
     }
 
     // run evaluate with setting parameters one row by row
-    private List<OriginalExceptionWrapper> evaluateAll() {
+    private Results evaluateAll() {
         mTestCaseNo = 0;
-        List<OriginalExceptionWrapper> failedTestCases = new ArrayList<OriginalExceptionWrapper>();
-        for (int to = testCases.getCount(); mTestCaseNo < to; mTestCaseNo++) {
-            mTestVector = testCases.getTestCase(mTestCaseNo);
+        Results results = new Results();
+        for (int to = mTestCases.getCount(); mTestCaseNo < to; mTestCaseNo++) {
+
+            final Object[] testVector = mTestCases.getTestCase(mTestCaseNo);
+            mParameterProvider = mStatementComponentFactory.createParameterProvider(testVector);
             try {
-                evaluateTestCase();
+                mTestCaseEvaluator.evaluateTestCase(testVector);
             } catch (OriginalExceptionWrapper failedTestCase) {
-                failedTestCases.add(mOriginalExceptionWrapperFactory.create(failedTestCase, mTestCaseNo, mTestVector));
+                results.add(mOriginalExceptionWrapperFactory.create(failedTestCase, mTestCaseNo, testVector));
+            } catch (InvalidDataSetException invalidDataSetException) {
+                results.add(mOriginalExceptionWrapperFactory.create(invalidDataSetException, mTestCaseNo, testVector));
+            } catch (PassedTestCaseException passedTestCaseException) {
+                results.add(mOriginalExceptionWrapperFactory.create(passedTestCaseException, mTestCaseNo, testVector));
             } catch (Throwable failedTestCase) {
-                failedTestCases.add(mOriginalExceptionWrapperFactory.create(failedTestCase, mTestCaseNo, mTestVector));
+                results.add(mOriginalExceptionWrapperFactory.create(failedTestCase, mTestCaseNo, testVector));
             }
         }
-        return failedTestCases;
+        return results;
     }
 
 

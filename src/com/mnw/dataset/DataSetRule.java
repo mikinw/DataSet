@@ -83,13 +83,13 @@ public class DataSetRule implements TestRule {
     }
 
     @Override
-    public final Statement apply(final Statement statement, final Description description) {
-        DataSet dataSet = description.getAnnotation(DataSet.class);
+    public final Statement apply(final Statement base, final Description description) {
+        final DataSet dataSet = description.getAnnotation(DataSet.class);
 
         // if no dataset present or it is default (no actual dataset set), just run evaluate as usual
         // DataSet.class marks the default meaning no dataset has been given
         if (dataSet == null || dataSet.testData() == DataSet.class) {
-            return statement;
+            return base;
         }
 
         if (mStatement != null) {
@@ -98,11 +98,24 @@ public class DataSetRule implements TestRule {
 
         final TestCaseable testData = mTestCaseableCreator.createTestData(dataSet);
 
+        TestCaseEvaluator testCaseEvaluator;
+        StatementComponentFactory statementComponentFactory;
         if (dataSet.expectedExceptionFirst()) {
-            mStatement = new ExceptionedDataSetStatement(statement, testData);
+            testCaseEvaluator = new ExceptionedCaseEvaluator(new OriginalExceptionWrapperFactory(), base);
+            statementComponentFactory = new ExceptionedStatementComponentFactory();
+//            mStatement = new ExceptionedDataSetStatement(base, testData);
         } else {
-            mStatement = new DefaultDataSetStatement(statement, testData);
+            testCaseEvaluator = new DefaultTestCaseEvaluator(new OriginalExceptionWrapperFactory(), base);
+            statementComponentFactory = new DefaultStatementComponentFactory();
+
+//            mStatement = new DefaultDataSetStatement(base, testData);
         }
+        mStatement = new DataSetStatement(testData,
+                                          new ErrorReportDecoratorImpl(),
+                                          new OriginalExceptionWrapperFactory(),
+                                          new FailureVerifier(),
+                                          testCaseEvaluator,
+                                          statementComponentFactory);
 
         return mStatement;
 

@@ -3,7 +3,6 @@ package com.mnw.dataset;
 import org.junit.internal.AssumptionViolatedException;
 
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Contains methods to create and format test run header, footer and Throwables that were thrown during test run.
@@ -52,12 +51,12 @@ public class ErrorReportDecoratorImpl implements ErrorReportDecorator {
     }
 
     @Override
-    public DataSetTestRunSummary createTestHeader(int testVectorCount, List<OriginalExceptionWrapper> failedTestCases) {
+    public DataSetTestRunSummaryWithAssertionFailure createTestHeader(int testVectorCount, Results failedTestCases) {
         String summary = createHeaderSummary(testVectorCount, failedTestCases);
-        return new DataSetTestRunSummary(summary);
+        return new DataSetTestRunSummaryWithAssertionFailure(summary);
     }
 
-    private String createHeaderSummary(int testCasesCount, List<OriginalExceptionWrapper> failedTestCases) {
+    private String createHeaderSummary(int testCasesCount, Results failedTestCases) {
         StringBuilder ret = new StringBuilder(100);
 
         int failedTestCount = 0;
@@ -74,7 +73,7 @@ public class ErrorReportDecoratorImpl implements ErrorReportDecorator {
                 skippedTestCount++;
             }
 
-            if (next.isSerious() || next.isAssertionError()) {
+            if (next.isSerious() || next.isAssertionFailure()) {
                 if (failedTestCount > 0) failedTestList.append(", ");
                 failedTestList.append(next.getTestCaseNo());
                 if (invalidDataSetWarning.isEmpty() && next.hasInvalidDatasetWarning()) {
@@ -95,17 +94,23 @@ public class ErrorReportDecoratorImpl implements ErrorReportDecorator {
             .append(" total tests ");
         if (failedTestCount > 0) {
             ret.append(failedTestCount)
-                .append(" failed ")
-                .append(System.getProperty("line.separator"))
-                .append("Failed cases (zero based): [")
-                .append(failedTestList)
-                .append("]");
-
+                .append(" failed ");
         }
         if (skippedTestCount > 0) {
             ret.append(skippedTestCount)
                 .append(skippedTestCount > 1 ? " were " : " was ")
-                .append("skipped")
+                .append("skipped");
+        }
+
+        if (failedTestCount > 0) {
+            ret
+                .append(System.getProperty("line.separator"))
+                .append("Failed cases (zero based): [")
+                .append(failedTestList)
+                .append("]");
+        }
+        if (skippedTestCount > 0) {
+            ret
                 .append(System.getProperty("line.separator"))
                 .append("Skipped cases (zero based): [")
                 .append(skippedTestList)
@@ -115,21 +120,34 @@ public class ErrorReportDecoratorImpl implements ErrorReportDecorator {
     }
 
     @Override
-    public Throwable createTestFooter(List<OriginalExceptionWrapper> failedTestCases) {
-        Throwable mostSeriousError = null;
-        for (OriginalExceptionWrapper failedTestCase : failedTestCases) {
-            if (failedTestCase.isSerious()) {
-                return new DataSetTestingEndedWithException();
-            }
-
-            if (failedTestCase.isAssertionError()) {
-                mostSeriousError = new AssertionError("Assertion error(s) found.");
-                mostSeriousError.setStackTrace(new StackTraceElement[0]);
-            } else if (failedTestCase.isSkipped() && !(mostSeriousError instanceof AssertionError)) {
-                mostSeriousError = new AssumptionViolatedException("All tests cases skipped.");
-                mostSeriousError.setStackTrace(new StackTraceElement[0]);
-            }
+    public Throwable createTestFooter(final Results testResults) {
+//        Throwable mostSeriousError = null;
+        if (testResults.hasErrorFailure()) {
+            return new DataSetTestingEndedWithException();
         }
-        return mostSeriousError;
+
+//        for (OriginalExceptionWrapper failedTestCase : testResults) {
+//            if (failedTestCase.isSerious()) {
+//            }
+
+//            if (failedTestCase.isAssertionFailure()) {
+//                mostSeriousError = new AssertionError("Assertion error(s) found.");
+//                mostSeriousError.setStackTrace(new StackTraceElement[0]);
+//            } else if (failedTestCase.isSkipped() && !(mostSeriousError instanceof AssertionError)) {
+//                mostSeriousError = new AssumptionViolatedException("All tests cases skipped.");
+//                mostSeriousError.setStackTrace(new StackTraceElement[0]);
+//            }
+//        }
+        return new DataSetTestingEndedWithAssertionError();
+//        return mostSeriousError;
+    }
+
+    @Override
+    public Throwable createOnlyAssumptionTestFooter(Results testResults) {
+        String summary = createHeaderSummary(testResults.getTotalCount(), testResults);
+
+        final AssumptionViolatedException assumptionViolatedException = new AssumptionViolatedException(summary);
+        assumptionViolatedException.setStackTrace(new StackTraceElement[0]);
+        return assumptionViolatedException;
     }
 }
