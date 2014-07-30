@@ -1,20 +1,29 @@
 package com.mnw.dataset;
 
+import com.google.common.base.Preconditions;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+
+import java.util.ArrayList;
 
 public class DataSetRule implements TestRule {
 
     /**
      * Holds the currently evaluated Statement
      */
-    private DataSetStatement mStatement;
-    private TestCaseableCreator mTestCaseableCreator;
+    private DataSetMultiStatement mStatement;
+    private final TestCaseableCreator mTestCaseableCreator;
+    private final DataSetMultiStatementFactory mDataSetMultiStatementFactory;
+    private final OriginalExceptionWrapperFactory mOriginalExceptionWrapperFactory;
 
     public DataSetRule() {
         mTestCaseableCreator = new TestCaseableCreator();
+        mDataSetMultiStatementFactory = new DataSetMultiStatementFactory();
+        mOriginalExceptionWrapperFactory = new OriginalExceptionWrapperFactory();
     }
+
+    //region Public api calls from the test methods
 
     /**
      * Returns the row number of the dataset that is being tested.
@@ -82,6 +91,8 @@ public class DataSetRule implements TestRule {
         throw new InvalidDataSetException("Parameter " + i + " can't be casted to Long.");
     }
 
+    //endregion Public api calls from the test methods
+
     @Override
     public final Statement apply(final Statement base, final Description description) {
         final DataSet dataSet = description.getAnnotation(DataSet.class);
@@ -92,30 +103,30 @@ public class DataSetRule implements TestRule {
             return base;
         }
 
-        if (mStatement != null) {
-            throw new IllegalStateException("statement is already set for this Rule instance");
-        }
+        Preconditions.checkState(mStatement == null, "Statement is already set for this Rule instance " +
+                    "It is possible, you are using the DataSetRule in a parallel run environment. It was hardly possible, when the" +
+                    "Rule was written, but the developer is happy to extend it. Please provide the way, you reached this exception.");
 
         final TestCaseable testData = mTestCaseableCreator.createTestData(dataSet);
 
         TestCaseEvaluator testCaseEvaluator;
         StatementComponentFactory statementComponentFactory;
         if (dataSet.expectedExceptionFirst()) {
-            testCaseEvaluator = new ExceptionedCaseEvaluator(new OriginalExceptionWrapperFactory(), base);
+            testCaseEvaluator = new ExceptionedCaseEvaluator(mOriginalExceptionWrapperFactory, base);
             statementComponentFactory = new ExceptionedStatementComponentFactory();
-//            mStatement = new ExceptionedDataSetStatement(base, testData);
         } else {
-            testCaseEvaluator = new DefaultTestCaseEvaluator(new OriginalExceptionWrapperFactory(), base);
+            testCaseEvaluator = new DefaultTestCaseEvaluator(mOriginalExceptionWrapperFactory, base);
             statementComponentFactory = new DefaultStatementComponentFactory();
-
-//            mStatement = new DefaultDataSetStatement(base, testData);
         }
-        mStatement = new DataSetStatement(testData,
-                                          new ErrorReportDecoratorImpl(),
-                                          new OriginalExceptionWrapperFactory(),
-                                          new FailureVerifier(),
-                                          testCaseEvaluator,
-                                          statementComponentFactory);
+        final ArrayList<DataSetStatement> dataSetMultiStatements = mDataSetMultiStatementFactory
+                .createDataSetMultiStatementFrom(testData);
+
+        mStatement = new DataSetMultiStatement(dataSetMultiStatements,
+                                               testCaseEvaluator,
+                                               statementComponentFactory,
+                                               mOriginalExceptionWrapperFactory,
+                                               new ErrorReportDecoratorImpl(),
+                                               new FailureVerifier());
 
         return mStatement;
 

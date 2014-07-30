@@ -1,10 +1,7 @@
 package com.mnw.dataset;
 
-import org.junit.Assert;
-import org.junit.runners.model.Statement;
-
 /**
- * Specific implementation of {@link DataSetStatement}, that expects an Exception class on the first
+ * Specific implementation of {@link DataSetMultiStatement}, that expects an Exception class on the first
  * place of the test vector. This Exception is the expected exception.
  */
 

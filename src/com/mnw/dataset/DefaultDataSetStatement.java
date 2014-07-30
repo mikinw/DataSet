@@ -1,9 +1,7 @@
 package com.mnw.dataset;
 
-import org.junit.runners.model.Statement;
-
 /**
- * Default {@link DataSetStatement} implementation, which runs (evaluates) the test as is, wraps its
+ * Default {@link DataSetMultiStatement} implementation, which runs (evaluates) the test as is, wraps its
  * result and gives access to the files of the test vector.
  */
 public class DefaultDataSetStatement /*extends DataSetStatement*/ {

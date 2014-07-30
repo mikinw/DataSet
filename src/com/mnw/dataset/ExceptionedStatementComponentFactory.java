@@ -15,4 +15,10 @@ public class ExceptionedStatementComponentFactory implements StatementComponentF
     public ParameterProvider createParameterProvider(Object[] testVector) {
         return new ExceptionedParameterProvider(testVector);
     }
+
+    @Override
+    public TestCaseEvaluator createEvaluator() {
+        // TODO implement method ExceptionedStatementComponentFactory:createEvaluator
+        return null;
+    }
 }

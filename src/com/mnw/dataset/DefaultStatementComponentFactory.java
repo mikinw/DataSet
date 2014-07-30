@@ -15,4 +15,10 @@ public class DefaultStatementComponentFactory implements StatementComponentFacto
     public ParameterProvider createParameterProvider(Object[] testVector) {
         return new DefaultParameterProvider(testVector);
     }
+
+    @Override
+    public TestCaseEvaluator createEvaluator() {
+//        return new DefaultTestCaseEvaluator();
+        return null;
+    }
 }

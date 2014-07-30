@@ -8,4 +8,5 @@ import org.junit.runners.model.Statement;
 public interface StatementComponentFactory {
     Statement createStatement();
     ParameterProvider createParameterProvider(Object[] testVector);
+    TestCaseEvaluator createEvaluator();
 }
