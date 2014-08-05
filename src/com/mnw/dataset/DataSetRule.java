@@ -126,7 +126,8 @@ public class DataSetRule implements TestRule {
                                                statementComponentFactory,
                                                mOriginalExceptionWrapperFactory,
                                                new ErrorReportDecoratorImpl(),
-                                               new FailureVerifier());
+                                               new FailureVerifier(),
+                                               new ResultAnalyser());
 
         return mStatement;
 

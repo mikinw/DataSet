@@ -13,6 +13,7 @@ class DataSetMultiStatement extends Statement {
     private final TestCaseEvaluator mTestCaseEvaluator;
     private final StatementComponentFactory mStatementComponentFactory;
     private final ArrayList<DataSetStatement> mDataSetMultiStatements;
+    private final ResultAnalyser mResultAnalyser;
 
     /**
      * This array is instantiated during the test function evaluation. If a valid DataSet.testData
@@ -38,13 +39,15 @@ class DataSetMultiStatement extends Statement {
                                     final StatementComponentFactory statementComponentFactory,
                                     final OriginalExceptionWrapperFactory originalExceptionWrapperFactory,
                                     final ErrorReportDecorator errorReportDecorator,
-                                    final FailureVerifier failureVerifier) {
+                                    final FailureVerifier failureVerifier,
+                                    final ResultAnalyser resultAnalyser) {
         mDataSetMultiStatements = dataSetMultiStatements;
         mOriginalExceptionWrapperFactory = originalExceptionWrapperFactory;
         mErrorReportDecorator = errorReportDecorator;
         mFailureVerifier = failureVerifier;
-        this.mTestCaseEvaluator = testCaseEvaluator;
+        mTestCaseEvaluator = testCaseEvaluator;
         mStatementComponentFactory = statementComponentFactory;
+        mResultAnalyser = resultAnalyser;
     }
 
     public Object getParameter(int i) throws InvalidDataSetException {
@@ -59,31 +62,9 @@ class DataSetMultiStatement extends Statement {
     public void evaluate() throws Throwable {
         Results results = evaluateAll();
 
-        List<Throwable> outputThrowableList = analyseFailedTestVectors(results);
+        List<Throwable> outputThrowableList = mResultAnalyser.analyseFailedTestVectors(results);
 
         mFailureVerifier.assertEmpty(outputThrowableList);
-    }
-
-    private List<Throwable> analyseFailedTestVectors(Results testResults) {
-        List<Throwable> outputThrowableList = new ArrayList<Throwable>();
-
-        // add header if error, assert, assumption
-        // footer is the most serious exception
-        if (testResults.isMostSeriousAssumptionFailure()) {
-            outputThrowableList.add(mErrorReportDecorator.createOnlyAssumptionTestFooter(testResults));
-            return outputThrowableList;
-        }
-
-        if (testResults.hasFailure()) {
-            outputThrowableList.add(mErrorReportDecorator.createTestHeader(mDataSetMultiStatements.size(), testResults));
-            for (OriginalExceptionWrapper testResult : testResults) {
-                if (!testResult.isPassedTest()) {
-                    outputThrowableList.add(testResult.decorateTestCaseFailed(mErrorReportDecorator));
-                }
-            }
-            outputThrowableList.add(mErrorReportDecorator.createTestFooter(testResults));
-        }
-        return outputThrowableList;
     }
 
     // run evaluate with setting parameters one row by row

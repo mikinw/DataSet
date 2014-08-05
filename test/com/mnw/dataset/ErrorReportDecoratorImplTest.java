@@ -12,9 +12,7 @@ import java.util.List;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
-/**
- * TODO description of this class is missing
- */
+@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 public class ErrorReportDecoratorImplTest {
 
 
@@ -36,11 +34,11 @@ public class ErrorReportDecoratorImplTest {
     @Test
     public void givesDataSetTestingEndedWithExceptionAsHeaderIfThereWasAnySeriousExceptionInTheList() {
         // init
-        List<OriginalExceptionWrapper> exceptionListWithSeriousException = ImmutableList.of(ASSUMPTION_WRAPPER, ASSERT_WRAPPER,
-                                                                                            SERIOUS_WRAPPER, ASSUMPTION_WRAPPER, ASSERT_WRAPPER);
+        final Results resultsWithSeriousException = resultsFrom(ImmutableList.of(ASSUMPTION_WRAPPER, ASSERT_WRAPPER,
+                                                                                 SERIOUS_WRAPPER, ASSUMPTION_WRAPPER, ASSERT_WRAPPER));
 
         // run
-        final Throwable testFooter = sut.createTestFooter(exceptionListWithSeriousException);
+        final Throwable testFooter = sut.createTestFooter(resultsWithSeriousException);
 
         // verify
         assertTrue(testFooter instanceof DataSetTestingEndedWithException);
@@ -49,10 +47,10 @@ public class ErrorReportDecoratorImplTest {
     @Test
     public void givesAssumptionViolatedExceptionAsHeaderIfThereWasOnlyAssumptionViolationExceptionInTheList() {
         // init
-        List<OriginalExceptionWrapper> exceptionListWithSeriousException = ImmutableList.of(ASSUMPTION_WRAPPER, ASSUMPTION_WRAPPER);
+        final Results resultsWithSeriousException = resultsFrom(ImmutableList.of(ASSUMPTION_WRAPPER, ASSUMPTION_WRAPPER));
 
         // run
-        final Throwable testFooter = sut.createTestFooter(exceptionListWithSeriousException);
+        final Throwable testFooter = sut.createTestFooter(resultsWithSeriousException);
 
         // verify
         assertTrue(testFooter instanceof AssumptionViolatedException);
@@ -61,13 +59,20 @@ public class ErrorReportDecoratorImplTest {
     @Test
     public void givesAssertExceptionAsHeaderIfThereWasAssertErrorButNoSeriousErrorInTheList() {
         // init
-        List<OriginalExceptionWrapper> exceptionListWithSeriousException = ImmutableList.of(ASSUMPTION_WRAPPER, ASSERT_WRAPPER, ASSERT_WRAPPER,
-                                                                                            ASSUMPTION_WRAPPER);
+        final Results resultsWithSeriousException = resultsFrom(ImmutableList.of(ASSUMPTION_WRAPPER, ASSERT_WRAPPER, ASSERT_WRAPPER, ASSUMPTION_WRAPPER));
 
         // run
-        final Throwable testFooter = sut.createTestFooter(exceptionListWithSeriousException);
+        final Throwable testFooter = sut.createTestFooter(resultsWithSeriousException);
 
         // verify
         assertTrue(testFooter instanceof AssertionError);
+    }
+
+    private Results resultsFrom(List<OriginalExceptionWrapper> exceptionListWithSeriousException) {
+        final Results results = new Results();
+        for (OriginalExceptionWrapper originalExceptionWrapper : exceptionListWithSeriousException) {
+            results.add(originalExceptionWrapper);
+        }
+        return results;
     }
 }
