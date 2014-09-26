@@ -1,40 +1,54 @@
 package com.mnw.dataset;
 
 import org.junit.Assert;
+import org.junit.internal.AssumptionViolatedException;
 import org.junit.runners.model.Statement;
 
 /**
  * TODO description of this class is missing
  */
 public class ExceptionedCaseEvaluator implements TestCaseEvaluator {
-    private final OriginalExceptionWrapperFactory mOriginalExceptionWrapperFactory;
     private final Statement mBaseStatement;
+    private final ResultFactory mResultFactory;
 
-    public ExceptionedCaseEvaluator(OriginalExceptionWrapperFactory originalExceptionWrapperFactory, Statement base) {
-        mOriginalExceptionWrapperFactory = originalExceptionWrapperFactory;
+    public ExceptionedCaseEvaluator(final ResultFactory resultFactory, final Statement base) {
         mBaseStatement = base;
+        mResultFactory = resultFactory;
     }
 
     @Override
-    public void evaluateTestCase(Object[] testVector) throws InvalidDataSetException, OriginalExceptionWrapper, PassedTestCaseException {
-        final Class<? extends Throwable> expectedExceptionClass = findExpectedExceptionClass(testVector);
-
+    public Result evaluateTestCase(Object[] testVector) {
         try {
-            mBaseStatement.evaluate();
+            final Class<? extends Throwable> expectedExceptionClass = findExpectedExceptionClass(testVector);
 
-            // we expect exception or else it is a failed run
-            Assert.fail("Expected: " + expectedExceptionClass);
+            try {
 
-        } catch (Throwable evaluateException) {
-            // gather more information on the exception
-            // try to match the expected exception with the evaluated one (superclasses taken into account. It this is not what we expected, we add the row information and throw the exception further
+                mBaseStatement.evaluate();
 
-            //noinspection StatementWithEmptyBody
-            if (!expectedExceptionClass.isAssignableFrom(evaluateException.getClass())) {
-                throw mOriginalExceptionWrapperFactory.create(evaluateException, "Unexpected Exception: " + evaluateException + " instead of ");
-            } else {
-                throw new PassedTestCaseException();
+                // we expect exception or else it is a failed run
+                Assert.fail("Expected: " + expectedExceptionClass);
+
+            } catch (AssumptionViolatedException ave) {
+                return mResultFactory.createSkippedResult(ave);
+            } catch (AssertionError ae) {
+                return mResultFactory.createAssertionFailureResult(ae);
+                // TODO [mnw] catch InvalidDataSetException ?
+            } catch (Throwable evaluateException) {
+                return mResultFactory.createSeriousResult(t);
+                // gather more information on the exception
+                // try to match the expected exception with the evaluated one (superclasses taken into account. It this is not what we expected, we add the row information and throw the exception further
+
+                //noinspection StatementWithEmptyBody
+                // TODO [mnw] continue from here
+                if (!expectedExceptionClass.isAssignableFrom(evaluateException.getClass())) {
+                    throw mOriginalExceptionWrapperFactory.create(evaluateException, "Unexpected Exception: " + evaluateException + " instead of ");
+                } else {
+                    return mResultFactory.createPassResult();
+                }
             }
+
+        } catch (InvalidDataSetException idse) {
+            return mResultFactory.createSeriousResult(idse);
         }
     }
 

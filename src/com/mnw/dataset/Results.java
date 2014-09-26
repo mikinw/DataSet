@@ -5,43 +5,44 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * TODO description of this class is missing
+ * Holds all the {@link Result}s of the all the test runs.
+ *
  */
-public class Results implements Iterable<OriginalExceptionWrapper> {
-    private final List<OriginalExceptionWrapper> mTestCaseResults = new ArrayList<OriginalExceptionWrapper>();
+public class Results implements Iterable<Result> {
+    private final List<Result> mTestCaseResults = new ArrayList<Result>();
     private int mAssertionFailureCount;
     private int mAssumptionFailureCount;
     private int mErrorCount;
 
     @Override
-    public Iterator<OriginalExceptionWrapper> iterator() {
+    public Iterator<Result> iterator() {
         return mTestCaseResults.iterator();
     }
 
-    public void add(OriginalExceptionWrapper originalExceptionWrapper) {
-        mTestCaseResults.add(originalExceptionWrapper);
+    public void add(Result result) {
+        mTestCaseResults.add(result);
 
-        if (originalExceptionWrapper.isAssertionFailure()) {
-            mAssertionFailureCount++;
-        }
-        if (originalExceptionWrapper.isSkipped()) {
+        if (result.isSkipped()) {
             mAssumptionFailureCount++;
         }
-        if (originalExceptionWrapper.isSerious()) {
+        if (result.isAssertionFailure()) {
+            mAssertionFailureCount++;
+        }
+        if (result.isSerious()) {
             mErrorCount++;
         }
     }
 
-    public boolean hasFailure() {
-        return getTotalFailureCount() > 0;
+    public boolean hasSkipped() {
+        return mAssumptionFailureCount > 0;
     }
 
-    public boolean hasErrorFailure() {
+    public boolean hasAssertionFailure() {
+        return mAssertionFailureCount > 0;
+    }
+
+    public boolean hasSerious() {
         return mErrorCount > 0;
-    }
-
-    public boolean isMostSeriousAssumptionFailure() {
-        return mAssertionFailureCount + mErrorCount == 0 && mAssumptionFailureCount > 0;
     }
 
     public int getTotalCount() {

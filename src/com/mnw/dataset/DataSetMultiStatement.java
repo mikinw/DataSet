@@ -90,6 +90,9 @@ class DataSetMultiStatement extends Statement {
 
         // TODO [mnw] this should rather be a list of other objects, not a list of throwables
         // TODO [mnw] handle only exceptions (no Errors)
+        Result result = mTestCaseEvaluator.evaluateTestCase(testVector);
+        mResults.add(result);
+
         try {
             mTestCaseEvaluator.evaluateTestCase(testVector);
         } catch (OriginalExceptionWrapper failedTestCase) {

@@ -26,12 +26,14 @@ public class DataSetRule implements TestRule {
     private final OriginalExceptionWrapperFactory mOriginalExceptionWrapperFactory;
 
     private final ParameterPotImpl mParameterPot;
+    private final ResultFactory mResultFactory;
 
     public DataSetRule() {
         mTestCaseableCreator = new TestCaseableCreator();
         mDataSetMultiStatementFactory = new DataSetMultiStatementFactory();
         mOriginalExceptionWrapperFactory = new OriginalExceptionWrapperFactory();
         mParameterPot = new ParameterPotImpl();
+        mResultFactory = new ResultFactory();
     }
 
     //region Public api calls from the test methods
@@ -41,7 +43,6 @@ public class DataSetRule implements TestRule {
      * @return The current test iteration (number of row the test runs with)
      */
     public int getTestCaseNumber() {
-        // TODO [mnw] reimplement this
         return mStatement.getTestCaseNumber();
     }
 
@@ -103,10 +104,10 @@ public class DataSetRule implements TestRule {
         final TestCaseEvaluator testCaseEvaluator;
         final StatementComponentFactory statementComponentFactory;
         if (dataSet.expectedExceptionFirst()) {
-            testCaseEvaluator = new ExceptionedCaseEvaluator(mOriginalExceptionWrapperFactory, base);
+            testCaseEvaluator = new ExceptionedCaseEvaluator(mResultFactory, base);
             statementComponentFactory = new ExceptionedStatementComponentFactory();
         } else {
-            testCaseEvaluator = new DefaultTestCaseEvaluator(mOriginalExceptionWrapperFactory, base);
+            testCaseEvaluator = new DefaultTestCaseEvaluator(mResultFactory, base);
             statementComponentFactory = new DefaultStatementComponentFactory();
         }
         final ArrayList<DataSetStatement> dataSetMultiStatements = mDataSetMultiStatementFactory
