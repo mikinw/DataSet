@@ -1,13 +1,17 @@
 package com.mnw.dataset;
 
+import com.google.common.base.Preconditions;
+
 /**
- * TODO description of this class is missing
+ * Parameter provider that takes the testVector as if there were only test parameters in it (no expected exception, no description).
+ * It checks boundaries.
  */
 public class DefaultParameterProvider implements ParameterProvider {
     private final Object[] mTestVector;
 
     public DefaultParameterProvider(Object[] testVector) {
-
+        Preconditions.checkNotNull("ParameterPotImpl is not properly initialised (TestVector seems to be null)." +
+                                           " DataSetRule should be initialised directly in the test class (not in the setUp()/@Before method).");
         mTestVector = testVector;
     }
 

@@ -21,6 +21,7 @@ class DataSetMultiStatement extends Statement {
     private final StatementComponentFactory mStatementComponentFactory;
     private final ArrayList<DataSetStatement> mDataSetMultiStatements;
     private final ResultAnalyser mResultAnalyser;
+    private final ParameterCan mParameterCan;
 
     /**
      * This array is instantiated during the test function evaluation. If a valid DataSet.testData
@@ -37,13 +38,13 @@ class DataSetMultiStatement extends Statement {
      * be requested from the second ([1] since it is zero based) element.
      */
 //    private Object[] mTestVector;
-    private ParameterProvider mParameterProvider;
     private DataSetStatement mCurrentStatement;
     private Results mResults;
 
     protected DataSetMultiStatement(final ArrayList<DataSetStatement> dataSetMultiStatements,
                                     final TestCaseEvaluator testCaseEvaluator,
                                     final StatementComponentFactory statementComponentFactory,
+                                    final ParameterCan parameterCan,
                                     final OriginalExceptionWrapperFactory originalExceptionWrapperFactory,
                                     final ErrorReportDecorator errorReportDecorator,
                                     final FailureVerifier failureVerifier,
@@ -55,10 +56,7 @@ class DataSetMultiStatement extends Statement {
         mTestCaseEvaluator = testCaseEvaluator;
         mStatementComponentFactory = statementComponentFactory;
         mResultAnalyser = resultAnalyser;
-    }
-
-    public Object getParameter(int i) throws InvalidDataSetException {
-        return mParameterProvider.getParameter(i);
+        mParameterCan = parameterCan;
     }
 
     public int getTestCaseNumber() {
@@ -88,9 +86,10 @@ class DataSetMultiStatement extends Statement {
     private void evaluateSingle(final DataSetStatement currentStatement, final Results results) {
         final Object[] testVector = currentStatement.mTestVector;
         final int testCaseNo = currentStatement.mOrderNumber;
-        mParameterProvider = mStatementComponentFactory.createParameterProvider(testVector);
+        mParameterCan.setStatement(mStatementComponentFactory.createParameterProvider(testVector));
 
         // TODO [mnw] this should rather be a list of other objects, not a list of throwables
+        // TODO [mnw] handle only exceptions (no Errors)
         try {
             mTestCaseEvaluator.evaluateTestCase(testVector);
         } catch (OriginalExceptionWrapper failedTestCase) {

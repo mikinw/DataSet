@@ -25,10 +25,13 @@ public class DataSetRule implements TestRule {
     private final DataSetMultiStatementFactory mDataSetMultiStatementFactory;
     private final OriginalExceptionWrapperFactory mOriginalExceptionWrapperFactory;
 
+    private final ParameterPotImpl mParameterPot;
+
     public DataSetRule() {
         mTestCaseableCreator = new TestCaseableCreator();
         mDataSetMultiStatementFactory = new DataSetMultiStatementFactory();
         mOriginalExceptionWrapperFactory = new OriginalExceptionWrapperFactory();
+        mParameterPot = new ParameterPotImpl();
     }
 
     //region Public api calls from the test methods
@@ -38,65 +41,45 @@ public class DataSetRule implements TestRule {
      * @return The current test iteration (number of row the test runs with)
      */
     public int getTestCaseNumber() {
+        // TODO [mnw] reimplement this
         return mStatement.getTestCaseNumber();
     }
 
-    /**
-     * returns an element from the mTestCases 2 dimensional array. The first dimension is set by a
-     * loop that calls evaluate as many times as the length of the array (first dimension). The
-     * second dimension is provided by the parameter. The function checks if the requested Object is
-     * out of boundaries or not. It is the callers responsibility to cast the returned Object to the
-     * desired class.
-     * @param i represents the i.th element in the defined dataset row. This value should be returned.
-     * @return The i.th element of the dataset row of the current test iteration.
-     * @throws InvalidDataSetException if something goes wrong
-     */
+
     public Object getParameter(int i) throws InvalidDataSetException {
-        if (mStatement == null) {
-            throw new NullPointerException("DataSetRule is not properly initialised (TestVector seems to be null)." + 
-                " DataSetRule should be initialised directly in the test class (not in the setUp()/@Before method).");
-        }
-        return mStatement.getParameter(i);
+        return mParameterPot.getParameter(i);
     }
 
     public boolean getBoolean(int i) throws InvalidDataSetException {
-        final Boolean parameter;
-        try {
-            parameter = (Boolean) mStatement.getParameter(i);
-        } catch (ClassCastException e) {
-            throw new InvalidDataSetException("Parameter " + i + " can't be casted to Boolean.", e);
-        }
-        return parameter;
+        return mParameterPot.getBoolean(i);
     }
 
     public int getInt(int i) throws InvalidDataSetException {
-        final Integer parameter;
-        try {
-            parameter = (Integer)mStatement.getParameter(i);
-        } catch (ClassCastException e) {
-            throw new InvalidDataSetException("Parameter " + i + " can't be casted to Integer.", e);
-        }
-        return parameter;
+        return mParameterPot.getInt(i);
     }
 
     public String getString(int i) throws InvalidDataSetException {
-        final String parameter;
-        try {
-            parameter = (String)mStatement.getParameter(i);
-        } catch (ClassCastException e) {
-            throw new InvalidDataSetException("Parameter " + i + " can't be casted to String.", e);
-        }
-        return parameter;
+        return mParameterPot.getString(i);
     }
 
     public long getLong(int i) throws InvalidDataSetException {
-        Object o = mStatement.getParameter(i);
-        if (o instanceof Long) {
-            return (Long)o;
-        } else if (o instanceof Integer) {
-            return (Integer)o;
-        }
-        throw new InvalidDataSetException("Parameter " + i + " can't be casted to Long.");
+        return mParameterPot.getLong(i);
+    }
+
+    public short getShort(int i) throws InvalidDataSetException {
+        return mParameterPot.getShort(i);
+    }
+
+    public byte getByte(int i) throws InvalidDataSetException {
+        return mParameterPot.getByte(i);
+    }
+
+    public float getFloat(int i) throws InvalidDataSetException {
+        return mParameterPot.getFloat(i);
+    }
+
+    public double getDouble(int i) throws InvalidDataSetException {
+        return mParameterPot.getDouble(i);
     }
 
     //endregion Public api calls from the test methods
@@ -132,6 +115,7 @@ public class DataSetRule implements TestRule {
         mStatement = new DataSetMultiStatement(dataSetMultiStatements,
                                                testCaseEvaluator,
                                                statementComponentFactory,
+                                               mParameterPot,
                                                mOriginalExceptionWrapperFactory,
                                                new ErrorReportDecoratorImpl(),
                                                new FailureVerifier(),
