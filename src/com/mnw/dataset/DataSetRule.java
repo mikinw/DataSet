@@ -7,7 +7,15 @@ import org.junit.runners.model.Statement;
 
 import java.util.ArrayList;
 
+/**
+ * Entry point for the Runner. It constructs the {@link org.junit.runners.model.Statement} which in this case would contain
+ * multiple evaluation runs.
+ * Also this is the entry point for getting parameters from a specific testVector during an evaluation run.
+ */
 public class DataSetRule implements TestRule {
+
+    // TODO [mnw] make it possible to add description to a given test vector
+
 
     /**
      * Holds the currently evaluated Statement
@@ -99,7 +107,7 @@ public class DataSetRule implements TestRule {
 
         // if no dataset present or it is default (no actual dataset set), just run evaluate as usual
         // DataSet.class marks the default meaning no dataset has been given
-        if (dataSet == null || dataSet.testData() == DataSet.class) {
+        if (dataSetIsNullOrDefault(dataSet)) {
             return base;
         }
 
@@ -109,8 +117,8 @@ public class DataSetRule implements TestRule {
 
         final TestCaseable testData = mTestCaseableCreator.createTestData(dataSet);
 
-        TestCaseEvaluator testCaseEvaluator;
-        StatementComponentFactory statementComponentFactory;
+        final TestCaseEvaluator testCaseEvaluator;
+        final StatementComponentFactory statementComponentFactory;
         if (dataSet.expectedExceptionFirst()) {
             testCaseEvaluator = new ExceptionedCaseEvaluator(mOriginalExceptionWrapperFactory, base);
             statementComponentFactory = new ExceptionedStatementComponentFactory();
@@ -131,6 +139,10 @@ public class DataSetRule implements TestRule {
 
         return mStatement;
 
+    }
+
+    private boolean dataSetIsNullOrDefault(DataSet dataSet) {
+        return dataSet == null || dataSet.testData() == DataSet.class;
     }
 
 }

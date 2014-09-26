@@ -5,6 +5,13 @@ import org.junit.runners.model.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Evaluates the statement with all the test vectors the dataSet has.
+ * Collects the results.
+ * Lets the results to be summarised.
+ * Makes the output to be generated.
+ * Throws a summarised exception for the "Runner" to catch it.
+ */
 @SuppressWarnings("OverlyBroadCatchBlock")
 class DataSetMultiStatement extends Statement {
     private final OriginalExceptionWrapperFactory mOriginalExceptionWrapperFactory;
@@ -78,11 +85,12 @@ class DataSetMultiStatement extends Statement {
         return mResults;
     }
 
-    private void evaluateSingle(DataSetStatement currentStatement, Results results) {
+    private void evaluateSingle(final DataSetStatement currentStatement, final Results results) {
         final Object[] testVector = currentStatement.mTestVector;
         final int testCaseNo = currentStatement.mOrderNumber;
         mParameterProvider = mStatementComponentFactory.createParameterProvider(testVector);
 
+        // TODO [mnw] this should rather be a list of other objects, not a list of throwables
         try {
             mTestCaseEvaluator.evaluateTestCase(testVector);
         } catch (OriginalExceptionWrapper failedTestCase) {

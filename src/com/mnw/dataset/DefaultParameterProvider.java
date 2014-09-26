@@ -17,7 +17,7 @@ public class DefaultParameterProvider implements ParameterProvider {
             throw new InvalidDataSetException("No DataSet defined, in spite of the fact that getParameter() has been called");
         }
         if (mTestVector.length < i || i < 0) {
-            throw new InvalidDataSetException("Requested parameter is out of the array");
+            throw new InvalidDataSetException("Requested parameter is out of the array. Size is: " + mTestVector.length);
         }
         return mTestVector[i];
     }
