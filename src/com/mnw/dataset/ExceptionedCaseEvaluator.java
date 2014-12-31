@@ -28,28 +28,28 @@ public class ExceptionedCaseEvaluator implements TestCaseEvaluator {
                 // we expect exception or else it is a failed run
                 Assert.fail("Expected: " + expectedExceptionClass);
 
-            } catch (AssumptionViolatedException ave) {
-                return mResultFactory.createSkippedResult(ave);
+            } catch (AssumptionViolatedException assumptionViolatedException) {
+                return mResultFactory.createSkippedResult(assumptionViolatedException);
             } catch (AssertionError ae) {
                 return mResultFactory.createAssertionFailureResult(ae);
                 // TODO [mnw] catch InvalidDataSetException ?
             } catch (Throwable evaluateException) {
-                return mResultFactory.createSeriousResult(t);
-                // gather more information on the exception
-                // try to match the expected exception with the evaluated one (superclasses taken into account. It this is not what we expected, we add the row information and throw the exception further
 
-                //noinspection StatementWithEmptyBody
-                // TODO [mnw] continue from here
+                // try to match the expected exception with the evaluated one (superclasses taken into account. It this is not what we expected, we add the row information and throw the exception further
                 if (!expectedExceptionClass.isAssignableFrom(evaluateException.getClass())) {
-                    throw mOriginalExceptionWrapperFactory.create(evaluateException, "Unexpected Exception: " + evaluateException + " instead of ");
+                    final String assertionDescription =
+                            "Unexpected exception, expected <" + expectedExceptionClass.getName() + ">, but was <" + evaluateException.getClass().toString() + ">";
+                    return mResultFactory.createSeriousResult(new Exception(assertionDescription, evaluateException));
                 } else {
                     return mResultFactory.createPassResult();
                 }
             }
 
-        } catch (InvalidDataSetException idse) {
-            return mResultFactory.createSeriousResult(idse);
+        } catch (InvalidDataSetException invalidDataSetException) {
+            return mResultFactory.createSeriousResult(invalidDataSetException);
         }
+        return mResultFactory.createSeriousResult(new RuntimeException("Programmer error: The only reason for this to be thrown is the findExpectedExceptionClass()" +
+                                                                               "method doesn't handle all cases properly"));
     }
 
     // try to find out what should be the expected exception

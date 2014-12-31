@@ -71,7 +71,7 @@ public class ErrorReportDecoratorImplTest {
     private Results resultsFrom(List<OriginalExceptionWrapper> exceptionListWithSeriousException) {
         final Results results = new Results();
         for (OriginalExceptionWrapper originalExceptionWrapper : exceptionListWithSeriousException) {
-            results.add(originalExceptionWrapper);
+//            results.add(originalExceptionWrapper);
         }
         return results;
     }

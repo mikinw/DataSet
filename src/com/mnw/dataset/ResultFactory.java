@@ -26,4 +26,14 @@ public class ResultFactory {
         // TODO [mnw] implement method ResultFactory:createSeriousResult
         return null;
     }
+
+    public Result createSeriousResult(Throwable evaluateException, String hint) {
+        // TODO [mnw] implement method ResultFactory:createSeriousResult
+        return null;
+    }
+
+    public Result createDetail(Result result, Object[] testVector, int testCaseNo) {
+        // TODO [mnw] implement method ResultFactory:createDetail
+        return null;
+    }
 }

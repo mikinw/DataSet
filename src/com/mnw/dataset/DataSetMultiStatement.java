@@ -22,6 +22,7 @@ class DataSetMultiStatement extends Statement {
     private final ArrayList<DataSetStatement> mDataSetMultiStatements;
     private final ResultAnalyser mResultAnalyser;
     private final ParameterCan mParameterCan;
+    private final ResultFactory mResultFactory;
 
     /**
      * This array is instantiated during the test function evaluation. If a valid DataSet.testData
@@ -44,12 +45,13 @@ class DataSetMultiStatement extends Statement {
     protected DataSetMultiStatement(final ArrayList<DataSetStatement> dataSetMultiStatements,
                                     final TestCaseEvaluator testCaseEvaluator,
                                     final StatementComponentFactory statementComponentFactory,
-                                    final ParameterCan parameterCan,
+                                    final ResultFactory resultFactory, final ParameterCan parameterCan,
                                     final OriginalExceptionWrapperFactory originalExceptionWrapperFactory,
                                     final ErrorReportDecorator errorReportDecorator,
                                     final FailureVerifier failureVerifier,
                                     final ResultAnalyser resultAnalyser) {
         mDataSetMultiStatements = dataSetMultiStatements;
+        mResultFactory = resultFactory;
         mOriginalExceptionWrapperFactory = originalExceptionWrapperFactory;
         mErrorReportDecorator = errorReportDecorator;
         mFailureVerifier = failureVerifier;
@@ -88,22 +90,8 @@ class DataSetMultiStatement extends Statement {
         final int testCaseNo = currentStatement.mOrderNumber;
         mParameterCan.setStatement(mStatementComponentFactory.createParameterProvider(testVector));
 
-        // TODO [mnw] this should rather be a list of other objects, not a list of throwables
-        // TODO [mnw] handle only exceptions (no Errors)
-        Result result = mTestCaseEvaluator.evaluateTestCase(testVector);
-        mResults.add(result);
-
-        try {
-            mTestCaseEvaluator.evaluateTestCase(testVector);
-        } catch (OriginalExceptionWrapper failedTestCase) {
-            results.add(mOriginalExceptionWrapperFactory.create(failedTestCase, testCaseNo, testVector));
-        } catch (InvalidDataSetException invalidDataSetException) {
-            results.add(mOriginalExceptionWrapperFactory.create(invalidDataSetException, testCaseNo, testVector));
-        } catch (PassedTestCaseException passedTestCaseException) {
-            results.add(mOriginalExceptionWrapperFactory.create(passedTestCaseException, testCaseNo, testVector));
-        } catch (Throwable failedTestCase) {
-            results.add(mOriginalExceptionWrapperFactory.create(failedTestCase, testCaseNo, testVector));
-        }
+        final Result result = mTestCaseEvaluator.evaluateTestCase(testVector);
+        mResults.add(mResultFactory.createDetail(result, testVector, testCaseNo));
     }
 
 }

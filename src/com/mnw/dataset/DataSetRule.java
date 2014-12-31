@@ -116,7 +116,7 @@ public class DataSetRule implements TestRule {
         mStatement = new DataSetMultiStatement(dataSetMultiStatements,
                                                testCaseEvaluator,
                                                statementComponentFactory,
-                                               mParameterPot,
+                                               resultFactory, mParameterPot,
                                                mOriginalExceptionWrapperFactory,
                                                new ErrorReportDecoratorImpl(),
                                                new FailureVerifier(),

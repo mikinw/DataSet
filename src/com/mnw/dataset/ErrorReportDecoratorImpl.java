@@ -61,7 +61,7 @@ public class ErrorReportDecoratorImpl implements ErrorReportDecorator {
 
         int failedTestCount = 0;
         int skippedTestCount = 0;
-        Iterator<OriginalExceptionWrapper> iterator = failedTestCases.iterator();
+        Iterator<OriginalExceptionWrapper> iterator = null ;failedTestCases.iterator();
         StringBuilder failedTestList = new StringBuilder(10);
         StringBuilder skippedTestList = new StringBuilder(10);
         String invalidDataSetWarning = "";
@@ -122,9 +122,10 @@ public class ErrorReportDecoratorImpl implements ErrorReportDecorator {
     @Override
     public Throwable createTestFooter(final Results testResults) {
 //        Throwable mostSeriousError = null;
-        if (testResults.hasErrorFailure()) {
+        // TODO [mnw] uncomment this
+/*        if (testResults.hasErrorFailure()) {
             return new DataSetTestingEndedWithException();
-        }
+        }*/
 
 //        for (OriginalExceptionWrapper failedTestCase : testResults) {
 //            if (failedTestCase.isSerious()) {

@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.IllegalFormatException;
+
 /**
  * This example demonstrates the simplest way to set up a dataset
  */
